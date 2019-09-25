@@ -2,19 +2,27 @@ grammar example;
 
 program: literal;
 
-operand: ATTRIBUTE_NAME | literal;
+//Batch 3
+
+//Batch 2
+condition: conjunction ('||' conjunction)*;
+conjunction: comparison ('&&' comparison)*;
+comparison: operand OP operand | '(' condition ')';
+// Batch 1
+operand: attribute_name | literal;
 literal: STR_LITERAL | INTEGER;
 
-ATTRIBUTE_LIST: ATTRIBUTE_NAME (',' ATTRIBUTE_NAME)*;
-TYPED_ATTRIBUTE_LIST: ATTRIBUTE_NAME TYPE (',' ATTRIBUTE_NAME TYPE)*;
-OPEN_CMD: 'OPEN' RELATION_NAME;
-CLOSE_CMD: 'CLOSE' RELATION_NAME;
-WRITE_CMD: 'WRITE' RELATION_NAME;
-EXIT_CMD: 'EXIT';
-ATTRIBUTE_NAME: IDENTIFIER;
-RELATION_NAME: IDENTIFIER;
+attribute_list: attribute_name (',' attribute_name)*;
+typed_attribute_list: attribute_name type (',' attribute_name type)*;
+open_cmd: 'OPEN' relation_name;
+close_cmd: 'CLOSE' relation_name;
+write_cmd: 'WRITE' relation_name;
+exit_cmd: 'EXIT';
+attribute_name: IDENTIFIER;
+relation_name: IDENTIFIER;
+type: 'VARCHAR' '(' INTEGER ')' | 'INTEGER';
+// Batch 0
 OP: '=='| '!=' | '<'| '>' | '<=' | '>=';
-TYPE: 'VARCHAR' (INTEGER) | 'INTEGER';
 IDENTIFIER: ALPHA (ALPHA | DIGIT)*;
 STR_LITERAL: '"'(ALPHA | DIGIT) + '"';
 INTEGER: POSDIG DIGIT* | '0';
