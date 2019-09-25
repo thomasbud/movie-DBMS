@@ -2,14 +2,18 @@ grammar example;
 
 program: literal;
 
-literal: (STR_LITERAL | INTEGER)+;
+operand: ATTRIBUTE_NAME | literal;
+literal: STR_LITERAL | INTEGER;
 
-OP: '==' | '!=' | '<' | '>' | '<=' | '>=';
-DIGIT: [0-9];
-ALPHA: [A-Za-z_];
+
+ATTRIBUTE_NAME: IDENTIFIER + ;
+RELATION_NAME: IDENTIFIER + ;
+OP: '=='| '!=' | '<'| '>' | '<=' | '>=';
+IDENTIFIER: ALPHA (ALPHA | DIGIT)*;
+STR_LITERAL: '"'(ALPHA | DIGIT) + '"';
+INTEGER: POSDIG DIGIT* | '0';
+DIGIT:[0-9];
+ALPHA:[A-Za-z_];
 POSDIG: [1-9];
-INTEGER: POSDIG DIGIT*;
-IDENTIFIER: ALPHA (ALPHA | POSDIG)*;
-STR_LITERAL: '"'(ALPHA | POSDIG)+'"';
-
+VARCHAR: 'VARCHAR ';
 WS: [ \n\t]->skip;
