@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import project1.antlr4.MyRulesBaseListener;
-import project1.antlr4.rulesLexer;
-import project1.antlr4.rulesParser;
+import project1.antlr4.RulesLexer;
+import project1.antlr4.RulesParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -26,16 +26,16 @@ public class main {
         for (String line : lines) {
             // Setting up lexer (tokenizer) and parser
             CharStream charStream = CharStreams.fromString(line);
-            rulesLexer lexer = new rulesLexer(charStream);
+            RulesLexer lexer = new RulesLexer(charStream);
             CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-            rulesParser parser = new rulesParser(commonTokenStream);
+            RulesParser parser = new RulesParser(commonTokenStream);
             // Removes lexer and parser warnings
             lexer.removeErrorListeners();
             parser.removeErrorListeners();
 
             // Creates parse tree listener and parse tree walker from the program parse rule
             // NOTE: ANTLR4 creates a method for each grammar rule in the automatically-generated parser file
-            rulesParser.ProgramContext programContext = parser.program();
+            RulesParser.ProgramContext programContext = parser.program();
             ParseTreeWalker walker = new ParseTreeWalker();
             walker.walk(listener, programContext);
 
