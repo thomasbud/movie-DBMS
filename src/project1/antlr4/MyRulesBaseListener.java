@@ -8,4 +8,10 @@ public class MyRulesBaseListener extends RulesBaseListener {
     @Override public void exitShow_cmd(RulesParser.Show_cmdContext ctx) {
         System.out.println("SHOW");
     }
+    @Override public void exitInsert_cmd(RulesParser.Insert_cmdContext ctx) {
+        System.out.println("INSERT INTO");
+    }
+    @Override public void exitCreate_cmd(RulesParser.Create_cmdContext ctx) {
+        System.out.println("CREATE TABLE");
+    }
 }
