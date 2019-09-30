@@ -1,4 +1,4 @@
 package project1;
 
-public class Dbms {
+public class dbms {
 }

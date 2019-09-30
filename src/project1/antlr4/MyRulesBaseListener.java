@@ -1,15 +1,14 @@
 package project1.antlr4;
+import project1.dbms;
 import org.antlr.v4.runtime.tree.ParseTree;
-import project1.Dbms;
 
-import java.sql.SQLOutput;
 import java.util.List;
 
-public class MyRulesBaseListener extends RulesBaseListener {
+public class MyRulesBaseListener extends rulesBaseListener{
     public MyRulesBaseListener() {
-        Dbms myDbms = new Dbms();
+        dbms mydbms = new dbms();
     }
-    /*
+     /*
     @Override public void enterShow_cmd(RulesParser.Show_cmdContext ctx) {
         List<ParseTree> children = ctx.children;
         System.out.println("ENTER SHOW");
@@ -28,7 +27,7 @@ public class MyRulesBaseListener extends RulesBaseListener {
     }
     */
 
-    @Override public void exitCreate_cmd(RulesParser.Create_cmdContext ctx) {
+    @Override public void exitCreate_cmd(rulesParser.Create_cmdContext ctx) {
         List<ParseTree> children = ctx.children;
         ParseTree second_child = children.get(1);
         String table_name = second_child.getText();
@@ -38,13 +37,13 @@ public class MyRulesBaseListener extends RulesBaseListener {
         String primary_key = sixthChild.getText();
         //dbms.createTable(table_name,table_fields,primary_key)
     }
-    @Override public void exitInsert_cmd(RulesParser.Insert_cmdContext ctx) {
+    @Override public void exitInsert_cmd(rulesParser.Insert_cmdContext ctx) {
         List<ParseTree> children = ctx.children;
         String line = "";
 
         for(ParseTree x :children){
 
-                System.out.println( x.getText());
+            System.out.println( x.getText());
 
         }
 

@@ -1,4 +1,4 @@
-// Generated from /Users/engrbundle/IdeaProjects/BasicAntlrScript/src/project1/rules.g4 by ANTLR 4.7.2
+// Generated from C:/Users/sidds/Documents/CSCE 315/PA1/CSCE315Project1/src/project1\rules.g4 by ANTLR 4.7.2
 package project1.antlr4;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class RulesLexer extends Lexer {
+public class rulesLexer extends Lexer {
 	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
@@ -94,7 +94,7 @@ public class RulesLexer extends Lexer {
 	}
 
 
-	public RulesLexer(CharStream input) {
+	public rulesLexer(CharStream input) {
 		super(input);
 		_interp = new LexerATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}

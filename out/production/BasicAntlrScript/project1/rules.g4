@@ -54,5 +54,3 @@ DIGIT:[0-9];
 ALPHA:[A-Za-z_];
 POSDIG: [1-9];
 WS: [ \n\t]->skip;
-
-
