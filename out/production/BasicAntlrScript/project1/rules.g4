@@ -20,7 +20,7 @@ atomic_expr : relation_name | '(' expr ')';
 selection : 'select' '(' condition ')' atomic_expr;
 projection: 'project' '(' attribute_list ')' atomic_expr;
 renaming : 'rename' '(' attribute_list ')' atomic_expr;
-union : atomic_expr '+' atomic_expr;
+union : atomic_expr '+' atomic_expr; // using shunting algorithm
 difference : atomic_expr '-' atomic_expr;
 product : atomic_expr '*' atomic_expr;
 natural_join: atomic_expr '&' atomic_expr;
