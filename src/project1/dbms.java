@@ -2,7 +2,6 @@ package project1;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class dbms {
 
@@ -18,22 +17,34 @@ public class dbms {
         Table(String tableName, List<String> attributeName, List<String> attributeType, List<Integer> attributeLength, List<String> primaryKeys)
         {
             this.tableName = tableName;
-            this.attributeName = attributeName;
-            this.attributeType = attributeType;
-            this.attributeLength = attributeLength;
-            this.primaryKeys = primaryKeys;
+            for(String s : attributeName)
+            {
+                this.attributeName.add(s);
+            }
+            for(String s : attributeType)
+            {
+                this.attributeType.add(s);
+            }
+            for(String s : attributeLength)
+            {
+                this.attributeLength.add(s);
+            }
+            for(String s : primaryKeys)
+            {
+                this.primaryKeys.add(s);
+            }
         }
 
         public void insertEntity(List<String> valuesIn)
         {
-            attributeValues.add(valuesIn);
+            //check the conditions later
+            attributeValues.add(valuesIn); //////////////////////////////////is this a deep copy?
         }
     }
 
     // private members
     private List<Table> tableList = new ArrayList();
-    private Stack<Table> buffer = new Stack<Table>();
-    int garbageName;
+    private Table buffer;
 
     // public members
     public int findTable(String tableTitle)
@@ -49,6 +60,7 @@ public class dbms {
         return -1; //will crash the program INTENTIONALLY if we can't find it because it's over at this points
     }
 
+    //specifically for CREATE TABLE command
     public void createTable(String tableName, List<String> attributeName, List<String> attributeType, List<Integer> attributeLength, List<String> primaryKeys)
     {
         tableList.add(new Table(tableName, attributeName, attributeType, attributeLength, primaryKeys));
@@ -56,13 +68,48 @@ public class dbms {
 
     public void insertInto(String tableTitle, List<String> valuesIn)
     {
-        tableList.get(findTable(tableTitle)).insertEntity(valuesIn);
+        tableList.get(findTable(tableTitle)).insertEntity(valuesIn); ////////////////////////////this too
     }
 
     // Inserts union of new table into tableList
-    public void union(Table tab1, Table tab2)
+    public void union(String tabName1, String tabName2)
     {
-        //tableList.add(new Table())
+        //search if tab 1 and 2 exists (second one should exist)
+        int idx1 = -1;
+        int idx2 = -1;
+        Table t1, t2;
+        for(int i = 0; i < tableList.size(); i++)
+        {
+            if(tabName1 == tableList.get(i).tableName)
+            {
+                idx1 = i;
+            }
+            else if(tabName2 == tableList.get(i).tableName)
+            {
+                idx2 = i;
+            }
+        }
+        //if one of them doesn't exist, that means that we use the table from the buffer
+        if(idx1 != -1){
+            t1=buffer;
+        }
+        else
+        {
+            t1=tableList.get(idx1);
+        }
+        t2=tableList.get(idx2);
+        //create a new table with info from ONE of these tables in the buffer
+        buffer = new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.attributeLength, t1.primaryKeys);
+        //populate the table with information from tab1 & tab2
+
+        for(int i=0; i<t1.attributeValues.size(); i++)
+        {
+            buffer.insertEntity(t1.attributeValues.get(i));
+        }
+        for(int i=0; i<t2.attributeValues.size(); i++)
+        {
+            buffer.insertEntity(t2.attributeValues.get(i));
+        }
     }
 
     public void print(String tableTitle)
