@@ -16,27 +16,33 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {
-        File file = new File("src/project1/input.txt");
-        Scanner scanner = new Scanner(file);
-        List<String> lines = new ArrayList<>();
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            if (line.length() != 0) {
-                lines.add(line);
-            }
+        dbms d = new dbms();
+        List<String> attName = new ArrayList<String>();
+        attName.add("Species");
+        List<String> attType = new ArrayList<String>();
+        attType.add("String");
+        List<Integer> attLen = new ArrayList<Integer>();
+        attLen.add(10);
+        List<String> attKeys = new ArrayList();
+        attKeys.add("Species");
 
-        }
-        MyRulesBaseListener listener = new MyRulesBaseListener();
-        for (String line : lines) {
-            CharStream charStream = CharStreams.fromString(line);
-            rulesLexer lexer = new rulesLexer(charStream);
-            CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-            rulesParser parser = new rulesParser(commonTokenStream);
-            lexer.removeErrorListeners();
-            parser.removeErrorListeners();
-            rulesParser.ProgramContext programContext = parser.program();
-            ParseTreeWalker walker = new ParseTreeWalker();
-            walker.walk(listener, programContext);
-        }
+        d.createTable("Animal", attName, attType, attLen, attKeys);
+
+        List<String> one = new ArrayList<String>();
+        one.add("Monkey");
+        d.insertInto("Animal", one);
+
+        d.print("Animal");
+
+
+
+        dbms d2 = new dbms();
+        d2.createTable("Brown", attName, attType, attLen, attKeys);
+
+        List<String> two = new ArrayList<String>();
+        two.add("Ape");
+        d.insertInto("Brown", two);
+
+        d.print("Brown");
     }
 }

@@ -25,7 +25,7 @@ public class dbms {
             {
                 this.attributeType.add(s);
             }
-            for(String s : attributeLength)
+            for(Integer s : attributeLength)
             {
                 this.attributeLength.add(s);
             }
@@ -114,20 +114,16 @@ public class dbms {
 
     public void print(String tableTitle)
     {
-        List<List<String>> out = new ArrayList<List<String>>();
-
         int tableIdx = findTable(tableTitle);
-        out.add(tableList.get(tableIdx).attributeName);
-        for(int i=0; i<tableList.size(); i++)
-            out.add(tableList.get(tableIdx).attributeValues.get(i));
-
-        for(int i=0; i<out.size(); i++)
-        {
-            for(int j=0; i<out.get(i).size(); j++)
-            {
-                System.out.print(out.get(i).get(j) + "\t");
+        for (String s : tableList.get(tableIdx).attributeName) {
+            System.out.print(s + "\t");
+        }
+        System.out.println("");
+        for (int i = 0; i < tableList.get(tableIdx).attributeValues.size(); i++) {
+            for (int j = 0; j < tableList.get(tableIdx).attributeValues.get(i).size(); j++) {
+                System.out.print(tableList.get(tableIdx).attributeValues.get(i).get(j) + "\t");
             }
-            System.out.println(" ");
+            System.out.println("");
         }
     }
 }
