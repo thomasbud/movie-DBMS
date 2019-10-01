@@ -126,6 +126,23 @@ public class MyRulesBaseListener extends rulesBaseListener{
         atomicExprShunting(exprLeaves, atomicExprOpStack,atomicExprQueue);
 
     }
+    @Override public void exitUnion(rulesParser.UnionContext ctx) {
+        System.out.println("------------------ Inside exitUnion ---------------------");
+        ParseTree exprNode = ctx;
+        System.out.println(exprNode.getText());
+
+        List<String> exprLeaves = new ArrayList<>();
+        getLeafNodes(exprNode, exprLeaves);
+
+        Deque<String> atomicExprOpStack = new ArrayDeque<>();
+        Queue<String> atomicExprQueue = new LinkedList<>();
+
+        atomicExprShunting(exprLeaves, atomicExprOpStack, atomicExprQueue);
+
+        System.out.println("----------------------------------------------------");
+
+
+    }
     private void getLeafNodes(ParseTree node, List<String> leaves){
         if (node.getChildCount() == 0 && !(node.getText().equals(","))){
             leaves.add(node.getText());
