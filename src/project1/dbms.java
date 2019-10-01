@@ -90,7 +90,7 @@ public class dbms {
             }
         }
         //if one of them doesn't exist, that means that we use the table from the buffer
-        if(idx1 != -1){
+        if(idx1 == -1){
             t1=buffer;
         }
         else

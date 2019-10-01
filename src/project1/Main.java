@@ -36,13 +36,22 @@ public class Main {
 
 
 
-        dbms d2 = new dbms();
-        d2.createTable("Brown", attName, attType, attLen, attKeys);
+
+        d.createTable("Brown", attName, attType, attLen, attKeys);
 
         List<String> two = new ArrayList<String>();
         two.add("Ape");
         d.insertInto("Brown", two);
 
         d.print("Brown");
+
+
+
+
+
+
+        d.union("Animal", "Brown");
+
+
     }
 }
