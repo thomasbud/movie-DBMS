@@ -4,6 +4,7 @@ import jdk.swing.interop.SwingInterOpUtils;
 import project1.dbms;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.io.IOException;
 import java.util.*;
 
 public class MyRulesBaseListener extends rulesBaseListener{
@@ -21,9 +22,6 @@ public class MyRulesBaseListener extends rulesBaseListener{
     }
     @Override public void enterInsert_cmd(RulesParser.Insert_cmdContext ctx) {
         System.out.println("ENTER INSERT INTO");
-    }
-    @Override public void exitInsert_cmd(RulesParser.Insert_cmdContext ctx) {
-        System.out.println("EXIT INSERT INTO");
     }
     @Override public void enterCreate_cmd(RulesParser.Create_cmdContext ctx) {
         System.out.println("ENTER CREATE TABLE");
@@ -56,16 +54,57 @@ public class MyRulesBaseListener extends rulesBaseListener{
 //        System.out.println(attrFields);
 
         // primary key
+
         ParseTree primeKeyNode = children.get(5);
         List<String> primary_keys = new ArrayList<>();
         getLeafNodes(primeKeyNode, primary_keys);
         myDbms.createTable(table_name,attrNames,attrFields,primary_keys);
+        /*
         System.out.println("-----------------------------------------");
         myDbms.print(table_name);
         System.out.println("-----------------------------------------");
 
+         */
+
     }
     @Override public void exitInsert_cmd(rulesParser.Insert_cmdContext ctx) {
+        //accounts for inserts in the form of "INSERT INTO relation_name VALUES FROM (,,,)"
+        boolean containsValuesFromRelation = false;
+        List<ParseTree> children = ctx.children;
+        for (ParseTree x : children) {
+            if (x.getText().equals("VALUES FROM RELATION")) {
+
+                containsValuesFromRelation = true;
+            }
+        }
+        if (containsValuesFromRelation == false) {
+            String tableTitle = children.get(1).getText();
+            List<String> values = new ArrayList<>();
+            ParseTree thirdChild = children.get(4);
+            for (int i = 4; i < ctx.getChildCount(); i += 2) {
+                values.add(children.get(i).getText());
+            }
+            myDbms.insertInto(tableTitle, values);
+        }
+    }
+    @Override public void exitShow_cmd(rulesParser.Show_cmdContext ctx) {
+        List<ParseTree> children = ctx.children;
+        String tableTitle = children.get(1).getText();
+        System.out.println("-----------After Calling SHOW-------------------" );
+        myDbms.print(tableTitle);
+    }
+
+    @Override public void exitWrite_cmd(rulesParser.Write_cmdContext ctx) {
+        List<ParseTree> children = ctx.children;
+        String tableTitle = children.get(1).getText();
+        try {
+            System.out.println("\n\n-----------After Calling WRITE -------------------" );
+            myDbms.writetoCSV(tableTitle);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
         //System.out.println("EXIT INSERT");
 //        List<ParseTree> children = ctx.children;
 //        String line = "";
@@ -120,7 +159,7 @@ public class MyRulesBaseListener extends rulesBaseListener{
         //System.out.println("table_name: " + table_name);
         //System.out.println("values: " + values);
         //dbms.insertInto(table_name,values)
-    }
+
 
     /*
     @Override public void enterProgram(RulesParser.ProgramContext ctx) {
@@ -236,13 +275,12 @@ public class MyRulesBaseListener extends rulesBaseListener{
 
         }
     }
-    private void conditionShunting(List<String> conditionLeaves, Deque<String> conditionOpStack, Queue<String> conditionQueue){
-        for (String el : conditionLeaves){
-            if (!isConditionOp(el) && !isRelAlgebraOp(el)){
+    private void conditionShunting(List<String> conditionLeaves, Deque<String> conditionOpStack, Queue<String> conditionQueue) {
+        for (String el : conditionLeaves) {
+            if (!isConditionOp(el) && !isRelAlgebraOp(el)) {
                 conditionQueue.add(el);
-            }
-            else{
-                if (conditionOpStack.peek() != null && isConditionOp(conditionOpStack.peek()) && isRelAlgebraOp(el)){
+            } else {
+                if (conditionOpStack.peek() != null && isConditionOp(conditionOpStack.peek()) && isRelAlgebraOp(el)) {
                     conditionQueue.add(conditionOpStack.remove());
                 }
                 conditionOpStack.push(el);
@@ -250,12 +288,10 @@ public class MyRulesBaseListener extends rulesBaseListener{
             }
         }
 
-        for (String el : conditionOpStack){
-            if (!el.equals("(") && !el.equals(")")){
+        for (String el : conditionOpStack) {
+            if (!el.equals("(") && !el.equals(")")) {
                 conditionQueue.add(el);
             }
         }
     }
-
-
 }

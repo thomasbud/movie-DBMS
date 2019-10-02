@@ -1,5 +1,8 @@
 package project1;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +54,7 @@ public class dbms {
     {
         for(int i = 0; i < tableList.size(); i++)
         {
-            if(tableTitle == tableList.get(i).tableName)
+            if(tableTitle.equals( tableList.get(i).tableName))
             {
                 return i;
             }
@@ -112,6 +115,58 @@ public class dbms {
         }
     }
 
+    public void writetoCSV(String tableTitle) throws IOException {
+        int rows = 0;
+        int cols  = 0;
+        int tableIdx = findTable(tableTitle);
+        int size = 0;
+        int check = 0;
+        for(List<String> specificEntity: tableList.get(tableIdx).attributeValues){
+            size++;
+        }
+        FileWriter csvWriter = new FileWriter("toTaste.csv");
+        int numAttributes = tableList.get(tableIdx).attributeName.size();
+        if(numAttributes == 1){
+            csvWriter.append(tableList.get(tableIdx).attributeName.remove(0));
+            csvWriter.append("\n");
+        }
+        else{
+            csvWriter.append(tableTitle);
+            csvWriter.append("\n\n");
+            check++;
+            for (int i = 0; i < (2*numAttributes); i++) {
+                if (i == (2 * numAttributes) - 1) {
+                    csvWriter.append("\n");
+                } else if (i % 2 == 0) {
+                    String val = tableList.get(tableIdx).attributeName.remove(0);
+                    csvWriter.append(val);
+                }
+                else {
+                    csvWriter.append(",");
+                }
+            }
+            for(int k = 1; k <= size;k++) {
+                for (int j = 0; j < (2 * numAttributes); j++) {
+                    if (j == (2 * numAttributes) - 1) {
+                        csvWriter.append("\n");
+                    }
+                    else if (j % 2 == 0) {
+                        csvWriter.append(tableList.get(tableIdx).attributeValues.get(rows).get(cols));
+                        cols++;
+                        if (cols == numAttributes) {
+                            cols = 0;
+                            rows = rows + 1;
+                        } else {
+                            csvWriter.append(",");
+                        }
+                    }
+                }
+            }
+            csvWriter.append("\n\n\n");
+            csvWriter.flush();
+            csvWriter.close();
+        }
+    }
     public void print(String tableTitle)
     {
         int tableIdx = findTable(tableTitle);
