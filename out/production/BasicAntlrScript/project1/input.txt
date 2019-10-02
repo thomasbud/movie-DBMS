@@ -1,1 +1,1 @@
-a <- select (kind == "cat" || (kind == "dog" && years > 3)) (animals1 + (animals2 * animals3))
+CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind)

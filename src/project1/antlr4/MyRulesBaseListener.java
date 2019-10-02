@@ -7,8 +7,9 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import java.util.*;
 
 public class MyRulesBaseListener extends rulesBaseListener{
+    private dbms myDbms;
     public MyRulesBaseListener() {
-        dbms mydbms = new dbms();
+        this.myDbms = new dbms();
     }
      /*
     @Override public void enterShow_cmd(RulesParser.Show_cmdContext ctx) {
@@ -34,10 +35,35 @@ public class MyRulesBaseListener extends rulesBaseListener{
         ParseTree second_child = children.get(1);
         String table_name = second_child.getText();
         ParseTree fourthChild = children.get(3);
-        String table_fields = fourthChild.getText();
-        ParseTree sixthChild = children.get(5);
-        String primary_key = sixthChild.getText();
-        //dbms.createTable(table_name,table_fields,primary_key)
+        List<String> combinedList = new ArrayList<>();
+        getLeafNodes(fourthChild, combinedList);
+        List<String> attrNames = new ArrayList<>();
+        List<String> attrFields = new ArrayList<>();
+        for (int i = 0; i < combinedList.size(); i++){
+            if(combinedList.get(i).equals("VARCHAR")){
+                attrFields.add(combinedList.get(i) + "(" + combinedList.get(i+2) + ")");
+                i += 3;
+            }
+            else if (combinedList.get(i).equals("INTEGER")){
+                attrFields.add(combinedList.get(i));
+            }
+            else {
+                attrNames.add(combinedList.get(i));
+            }
+        }
+//        System.out.println(combinedList);
+//        System.out.println(attrNames);
+//        System.out.println(attrFields);
+
+        // primary key
+        ParseTree primeKeyNode = children.get(5);
+        List<String> primary_keys = new ArrayList<>();
+        getLeafNodes(primeKeyNode, primary_keys);
+        myDbms.createTable(table_name,attrNames,attrFields,primary_keys);
+        System.out.println("-----------------------------------------");
+        myDbms.print(table_name);
+        System.out.println("-----------------------------------------");
+
     }
     @Override public void exitInsert_cmd(rulesParser.Insert_cmdContext ctx) {
         //System.out.println("EXIT INSERT");
@@ -180,6 +206,35 @@ public class MyRulesBaseListener extends rulesBaseListener{
             }
         }
         System.out.println("atomicExprQueue: " + atomicExprQueue);
+        Deque<String> opQ = new ArrayDeque<>();
+        for (String el : atomicExprQueue){
+            opQ.push(el);
+            if (el.equals("+")){
+                // Look at previous two elements in OpQ
+                opQ.remove(); // remove +
+                String rel1 = opQ.remove();
+                String rel2 = opQ.remove();
+                //dbms.union(rel1, rel2)
+                opQ.push(UUID.randomUUID().toString()); // pushes a garbage value
+            }
+            else if (el.equals("-")){
+                // Look at previous two elements in OpQ
+                opQ.remove(); // remove +
+                String rel1 = opQ.remove();
+                String rel2 = opQ.remove();
+                //dbms.difference(rel1, rel2)
+                opQ.push(UUID.randomUUID().toString()); // pushes a garbage value
+            }
+            if (el.equals("*")){
+                // Look at previous two elements in OpQ
+                opQ.remove(); // remove +
+                String rel1 = opQ.remove();
+                String rel2 = opQ.remove();
+                //dbms.product(rel1, rel2)
+                opQ.push(UUID.randomUUID().toString()); // pushes a garbage value
+            }
+
+        }
     }
     private void conditionShunting(List<String> conditionLeaves, Deque<String> conditionOpStack, Queue<String> conditionQueue){
         for (String el : conditionLeaves){
