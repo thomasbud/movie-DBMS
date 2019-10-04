@@ -1,5 +1,7 @@
 package project1;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLOutput;
@@ -51,7 +53,7 @@ public class dbms {
     // public members
     public int findTable(String tableTitle)
     {
-        for(int i = 0; i < tableList.size(); i++)
+        for(int i = 0; i < tableList.size(); i++)   
         {
             if(tableTitle.equals( tableList.get(i).tableName))
             {
@@ -128,25 +130,19 @@ public class dbms {
 
         System.out.println(buffer.get(0));
     }
-
     public void writetoCSV(String tableTitle) throws IOException {
         int rows = 0;
         int cols  = 0;
         int tableIdx = findTable(tableTitle);
-        int size = 0;
         int check = 0;
-        for(List<String> specificEntity: tableList.get(tableIdx).attributeValues){
-            size++;
-        }
-        FileWriter csvWriter = new FileWriter("toTaste.csv");
+        String path = tableTitle + ".csv";
+        FileWriter csvWriter = new FileWriter(path, false);
         int numAttributes = tableList.get(tableIdx).attributeName.size();
         if(numAttributes == 1){
             csvWriter.append(tableList.get(tableIdx).attributeName.remove(0));
             csvWriter.append("\n");
         }
         else{
-            csvWriter.append(tableTitle);
-            csvWriter.append("\n\n");
             check++;
             for (int i = 0; i < (2*numAttributes); i++) {
                 if (i == (2 * numAttributes) - 1) {
@@ -159,7 +155,7 @@ public class dbms {
                     csvWriter.append(",");
                 }
             }
-            for(int k = 1; k <= size;k++) {
+            for(int k = 1; k <=  tableList.get(tableIdx).attributeValues.size()  ;k++) {
                 for (int j = 0; j < (2 * numAttributes); j++) {
                     if (j == (2 * numAttributes) - 1) {
                         csvWriter.append("\n");

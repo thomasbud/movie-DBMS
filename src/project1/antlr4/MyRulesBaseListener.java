@@ -86,6 +86,10 @@ public class MyRulesBaseListener extends rulesBaseListener{
             }
             myDbms.insertInto(tableTitle, values);
         }
+        else{
+            ParseTree command_after_relation = children.get(3);
+            System.out.println("lets try: " + command_after_relation.getText());
+        }
     }
     @Override public void exitShow_cmd(rulesParser.Show_cmdContext ctx) {
         List<ParseTree> children = ctx.children;
@@ -170,6 +174,7 @@ public class MyRulesBaseListener extends rulesBaseListener{
     }
     */
     @Override public void exitSelection(rulesParser.SelectionContext ctx) {
+        System.out.println("Entered selection");
         ParseTree conditionNode = ctx.children.get(2);
         ParseTree exprNode = ctx.children.get(4);
 
@@ -300,5 +305,6 @@ public class MyRulesBaseListener extends rulesBaseListener{
                 conditionQueue.add(el);
             }
         }
+        System.out.println("conditionQueue: " + conditionQueue);
     }
 }
