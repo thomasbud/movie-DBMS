@@ -78,14 +78,12 @@ public class dbms {
     // Inserts union of new table into tableList
     public void union(String tabName1, String tabName2)
     {
-        System.out.println("tanal now");
+        System.out.println("tabName1: " + tabName1);
+        System.out.println("tabName2: " + tabName2);
         //search if tab 1 and 2 exists (second one should exist)
         int idx1 = -1;
         int idx2 = -1;
         Table t1, t2;
-        for (Table el : tableList){
-            System.out.println(el.tableName);
-        }
         for(int i = 0; i < tableList.size(); i++)
         {
             //System.out.println("table list size" + tableList.get(i).tableName);
@@ -98,8 +96,8 @@ public class dbms {
                 idx2 = i;
             }
         }
-        System.out.println(idx1);
-        System.out.println(idx2);
+        System.out.println("tabName1 idx: " + idx1);
+        System.out.println("tabName2 idx: " + idx2);
         //if one of them doesn't exist, that means that we use the table from the buffer
         if(idx1 == -1){
             t1=buffer.remove(0);
@@ -112,14 +110,13 @@ public class dbms {
         //create a new table with info from ONE of these tables in the buffer
         buffer.add(new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
         //populate the table with information from tab1 & tab2
-        System.out.println(t1.attributeValues.size());
         for(int i=0; i<t1.attributeValues.size(); i++)
         {
-            System.out.println("hi");
             Table temp = buffer.get(0);
             temp.insertEntity(t1.attributeValues.get(i));
             buffer.set(0, temp);
         }
+        System.out.println("tableName: "+ buffer.get(0).tableName);
         for(int i=0; i<t2.attributeValues.size(); i++)
         {
             //buffer.get(0).insertEntity(t2.attributeValues.get(i));
@@ -127,8 +124,7 @@ public class dbms {
             temp.insertEntity(t2.attributeValues.get(i));
             buffer.set(0, temp);
         }
-
-        System.out.println(buffer.get(0));
+        System.out.println("tableName now: " + buffer.get(0).tableName);
     }
     public void writetoCSV(String tableTitle) throws IOException {
         int rows = 0;
@@ -179,16 +175,34 @@ public class dbms {
     }
     public void print(String tableTitle)
     {
+        System.out.println("tableTitle: " + tableTitle);
         int tableIdx = findTable(tableTitle);
-        for (String s : tableList.get(tableIdx).attributeName) {
-            System.out.print(s + "\t");
-        }
-        System.out.println("");
-        for (int i = 0; i < tableList.get(tableIdx).attributeValues.size(); i++) {
-            for (int j = 0; j < tableList.get(tableIdx).attributeValues.get(i).size(); j++) {
-                System.out.print(tableList.get(tableIdx).attributeValues.get(i).get(j) + "\t");
+        if(tableIdx == -1){
+            tableIdx = buffer.size()-1;
+            for (String s : buffer.get(tableIdx).attributeName) {
+                System.out.print(s + "\t");
             }
             System.out.println("");
+            for (int i = 0; i < buffer.get(tableIdx).attributeValues.size(); i++) {
+                for (int j = 0; j < buffer.get(tableIdx).attributeValues.get(i).size(); j++) {
+                    System.out.print(buffer.get(tableIdx).attributeValues.get(i).get(j) + "\t");
+                }
+                System.out.println("");
+            }
+            System.out.println("buffer at top: " + buffer.get(tableIdx).attributeValues);
         }
+        else{
+            for (String s : tableList.get(tableIdx).attributeName) {
+                System.out.print(s + "\t");
+            }
+            System.out.println("");
+            for (int i = 0; i < tableList.get(tableIdx).attributeValues.size(); i++) {
+                for (int j = 0; j < tableList.get(tableIdx).attributeValues.get(i).size(); j++) {
+                    System.out.print(tableList.get(tableIdx).attributeValues.get(i).get(j) + "\t");
+                }
+                System.out.println("");
+            }
+        }
+
     }
 }
