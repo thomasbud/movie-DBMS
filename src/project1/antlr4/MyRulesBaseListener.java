@@ -187,8 +187,10 @@ public class MyRulesBaseListener extends rulesBaseListener{
         Deque<String> atomicExprOpStack = new ArrayDeque<>();
         Queue<String> atomicExprQueue = new LinkedList<>();
         // shuntAlg(condition
-        conditionShunting(conditionLeaves, conditionOpStack, conditionQueue);
         atomicExprShunting(exprLeaves, atomicExprOpStack,atomicExprQueue);
+        conditionShunting(conditionLeaves, conditionOpStack, conditionQueue);
+
+
 
     }
     @Override public void exitUnion(rulesParser.UnionContext ctx) {
@@ -250,10 +252,15 @@ public class MyRulesBaseListener extends rulesBaseListener{
             opQ.push(el);
             if (el.equals("+")){
                 // Look at previous two elements in OpQ
+                System.out.println("tanal");
+                System.out.println(opQ);
                 opQ.remove(); // remove +
+                System.out.println(opQ);
                 String rel1 = opQ.remove();
                 String rel2 = opQ.remove();
-                //dbms.union(rel1, rel2)
+                System.out.println(rel1);
+                System.out.println(rel2);
+                myDbms.union(rel1, rel2);
                 opQ.push(UUID.randomUUID().toString()); // pushes a garbage value
             }
             else if (el.equals("-")){
