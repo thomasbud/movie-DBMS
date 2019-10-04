@@ -13,7 +13,6 @@ public class dbms {
         String tableName;
         List<String> attributeName = new ArrayList<String>();
         List<String> attributeType = new ArrayList<String>();
-        //List<Integer> attributeLength = new ArrayList<Integer>();
         List<String> primaryKeys = new ArrayList<String>();
         List<List<String>> attributeValues = new ArrayList<List<String>>();
 
@@ -21,37 +20,24 @@ public class dbms {
         Table(String tableName, List<String> attributeName, List<String> attributeType, List<String> primaryKeys)
         {
             this.tableName = tableName;
-            for(String s : attributeName)
-            {
-                this.attributeName.add(s);
-            }
-            for(String s : attributeType)
-            {
-                this.attributeType.add(s);
-            }
-//            for(Integer s : attributeLength)
-//            {
-//                this.attributeLength.add(s);
-//            }
-            for(String s : primaryKeys)
-            {
-                this.primaryKeys.add(s);
-            }
+            this.attributeName.addAll(attributeName);
+            this.attributeType.addAll(attributeType);
+            this.primaryKeys.addAll(primaryKeys);
         }
 
         public void insertEntity(List<String> valuesIn)
         {
             //check the conditions later
-            attributeValues.add(valuesIn); //////////////////////////////////is this a deep copy?
+            attributeValues.add(valuesIn);
         }
     }
 
     // private members
-    private List<Table> tableList = new ArrayList();
-    private List<Table> buffer = new ArrayList<>();
+    private List<Table> tableList = new ArrayList<Table>();
+    private List<Table> buffer = new ArrayList<Table>();
 
     // public members
-    public int findTable(String tableTitle)
+    private int findTable(String tableTitle)
     {
         for(int i = 0; i < tableList.size(); i++)   
         {
@@ -72,7 +58,7 @@ public class dbms {
 
     public void insertInto(String tableTitle, List<String> valuesIn)
     {
-        tableList.get(findTable(tableTitle)).insertEntity(valuesIn); ////////////////////////////this too
+        tableList.get(findTable(tableTitle)).insertEntity(valuesIn);
     }
 
     // Inserts union of new table into tableList
@@ -130,7 +116,6 @@ public class dbms {
         int rows = 0;
         int cols  = 0;
         int tableIdx = findTable(tableTitle);
-        int check = 0;
         String path = tableTitle + ".csv";
         FileWriter csvWriter = new FileWriter(path, false);
         int numAttributes = tableList.get(tableIdx).attributeName.size();
@@ -139,7 +124,6 @@ public class dbms {
             csvWriter.append("\n");
         }
         else{
-            check++;
             for (int i = 0; i < (2*numAttributes); i++) {
                 if (i == (2 * numAttributes) - 1) {
                     csvWriter.append("\n");
