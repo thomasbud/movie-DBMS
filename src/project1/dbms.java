@@ -50,6 +50,29 @@ public class dbms {
         return -1; //will crash the program INTENTIONALLY if we can't find it because it's over at this points
     }
 
+    private Table setTempTable(String tabName)
+    {
+        int idx = -1;
+        Table t;
+        for(int i = 0; i < tableList.size(); i++)
+        {
+            //System.out.println("table list size" + tableList.get(i).tableName);
+            if(tabName.equals(tableList.get(i).tableName))
+            {
+                idx = i;
+            }
+        }
+        if(idx == -1){
+            t=buffer.remove(0);
+        }
+        else
+        {
+            t=tableList.get(idx);
+        }
+
+        return t;
+    }
+
     //specifically for CREATE TABLE command
     public void createTable(String tableName, List<String> attributeName, List<String> attributeType, List<String> primaryKeys)
     {
@@ -67,33 +90,16 @@ public class dbms {
         System.out.println("tabName1: " + tabName1);
         System.out.println("tabName2: " + tabName2);
         //search if tab 1 and 2 exists (second one should exist)
-        int idx1 = -1;
-        int idx2 = -1;
-        Table t1, t2;
-        for(int i = 0; i < tableList.size(); i++)
-        {
-            //System.out.println("table list size" + tableList.get(i).tableName);
-            if(tabName1.equals(tableList.get(i).tableName))
-            {
-                idx1 = i;
-            }
-            if(tabName2.equals(tableList.get(i).tableName))
-            {
-                idx2 = i;
-            }
-        }
-        System.out.println("tabName1 idx: " + idx1);
-        System.out.println("tabName2 idx: " + idx2);
+
+        Table t1 = setTempTable(tabName1);
+        Table t2 = setTempTable(tabName2);
+
+        //System.out.println("tabName1 idx: " + idx1);
+        //System.out.println("tabName2 idx: " + idx2);
         //if one of them doesn't exist, that means that we use the table from the buffer
-        if(idx1 == -1){
-            t1=buffer.remove(0);
-        }
-        else
-        {
-            t1=tableList.get(idx1);
-        }
-        t2=tableList.get(idx2);
-        //create a new table with info from ONE of these tables in the buffer
+
+        //t2=tableList.get(idx2); //assumption: t2 will definitely come from the stack
+        //create a new table with info from the first table
         buffer.add(new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
         //populate the table with information from tab1 & tab2
         for(int i=0; i<t1.attributeValues.size(); i++)

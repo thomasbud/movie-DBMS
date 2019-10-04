@@ -10,7 +10,7 @@ CREATE TABLE animals1 (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY
 
 INSERT INTO animals VALUES FROM ("tanal", "cat", 4);
 INSERT INTO animals VALUES FROM ("potato", "cat", 10);
-INSERT INTO animals VALUES FROM ("tamoto", "dog", 3);
+INSERT INTO animals VALUES FROM ("tamoto", "dog", 3);  
 
 CREATE TABLE animals2 (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
 
@@ -18,4 +18,4 @@ INSERT INTO animals2 VALUES FROM ("toTaste", "cat", 4);
 INSERT INTO animals2 VALUES FROM ("toAttampt", "cat", 10);
 INSERT INTO animals2 VALUES FROM ("toImplement", "dog", 3);
 
-SHOW (animals + (animals1 + animals2))
+SHOW (animals +  animals2)
