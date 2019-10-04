@@ -1,21 +1,18 @@
-CREATE TABLE animals (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
-
-INSERT INTO animals VALUES FROM ("Joe", "cat", 4);
-INSERT INTO animals VALUES FROM ("tanal", "dog", 10);
-INSERT INTO animals VALUES FROM ("Snoopy", "dog", 3);
-INSERT INTO animals VALUES FROM ("Tweety", "bird", 1);
-INSERT INTO animals VALUES FROM ("Joe", "bird", 2);
-
 CREATE TABLE animals1 (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
 
-INSERT INTO animals VALUES FROM ("tanal", "cat", 4);
-INSERT INTO animals VALUES FROM ("potato", "cat", 10);
-INSERT INTO animals VALUES FROM ("tamoto", "dog", 3);  
+INSERT INTO animals1 VALUES FROM ("Joe", "cat", 4);
+INSERT INTO animals1 VALUES FROM ("toAttampt", "cat", 4);
+
 
 CREATE TABLE animals2 (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
 
-INSERT INTO animals2 VALUES FROM ("toTaste", "cat", 4);
-INSERT INTO animals2 VALUES FROM ("toAttampt", "cat", 10);
-INSERT INTO animals2 VALUES FROM ("toImplement", "dog", 3);
+INSERT INTO animals2 VALUES FROM ("tanal", "cat", 4);
+INSERT INTO animals2 VALUES FROM ("side", "dog", 4);
 
-SHOW (animals + (animals1 + animals2))
+
+CREATE TABLE animals3 (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
+
+INSERT INTO animals3 VALUES FROM ("toTaste", "cat", 4);
+
+
+SHOW (animals2 + (animals1 + (animals2+ animals3)))
