@@ -196,8 +196,8 @@ public class MyRulesBaseListener extends rulesBaseListener{
         // shuntAlg(condition
         //atomicExprShunting(exprLeaves, atomicExprOpStack,atomicExprQueue);
         conditionShunting(conditionLeaves, conditionOpStack, conditionQueue);
-
-
+    }
+    @Override public void exitQuery(rulesParser.QueryContext ctx) {
 
     }
     @Override public void exitUnion(rulesParser.UnionContext ctx) {
@@ -206,23 +206,33 @@ public class MyRulesBaseListener extends rulesBaseListener{
         System.out.println(exprNode.getText());
 
         List<String> exprLeaves = new ArrayList<>();
-        List<String> passingLeaves = new ArrayList<>();
+        //List<String> passingLeaves = new ArrayList<>();
         getLeafNodes(exprNode, exprLeaves);
         System.out.println("Expression leaves" + exprLeaves);
-        if (!exprLeaves.contains("SELECT") && !exprLeaves.contains("PROJECT") && !exprLeaves.contains("RENAME")){
-            for (String el : opQ){
-                passingLeaves.add(0, el);
-            }
-            if (opQ.size() == 0) passingLeaves.add(0, exprLeaves.get(2));
-            passingLeaves.add(0,exprLeaves.get(1));
-            passingLeaves.add(0, exprLeaves.get(0));
-        }
-        System.out.println("Passing Leaves: " + passingLeaves);
+//        if (!exprLeaves.contains("SELECT") && !exprLeaves.contains("PROJECT") && !exprLeaves.contains("RENAME")){
+//            if (exprLeaves.size() <= 3){
+//                for (String el: exprLeaves){
+//                    passingLeaves.add(0, el);
+//                }
+//            }
+//            else {
+//                for (String el : opQ){
+//                    passingLeaves.add(0, el);
+//                }
+//                if (opQ.size() == 0)
+//                    passingLeaves.add(0, exprLeaves.get(2));
+//
+//                passingLeaves.add(0,exprLeaves.get(1));
+//                passingLeaves.add(0, exprLeaves.get(0));
+//            }
+//
+//        }
+//        System.out.println("Passing Leaves: " + passingLeaves);
         Deque<String> atomicExprOpStack = new ArrayDeque<>();
         Queue<String> atomicExprQueue = new LinkedList<>();
 
 
-        atomicExprShunting(passingLeaves, atomicExprOpStack, atomicExprQueue, opQ);
+        atomicExprShunting(exprLeaves, atomicExprOpStack, atomicExprQueue, opQ);
 
         System.out.println("----------------------------------------------------");
 
@@ -255,9 +265,14 @@ public class MyRulesBaseListener extends rulesBaseListener{
             if (!isCombiningOp(el) && !isRelAlgebraOp(el)){
                 atomicExprQueue.add(el);
             } else {
-                atomicExprOpStack.push(el);
-
+                if (el.equals(")") && (!atomicExprOpStack.peek().equals("("))) {
+                    atomicExprQueue.add(atomicExprOpStack.remove());
+                }
+                else {
+                    atomicExprOpStack.push(el);
+                }
             }
+
         }
         for (String el : atomicExprOpStack){
             if (!el.equals("(") && !el.equals(")")){
@@ -270,15 +285,14 @@ public class MyRulesBaseListener extends rulesBaseListener{
             System.out.println("initial opQ: " + opQ);
             if (el.equals("+")){
                 // Look at previous two elements in OpQ
-                System.out.println(opQ);
                 opQ.remove(); // remove +
                 String rel1 = opQ.remove();
                 String rel2 = opQ.remove();
-                System.out.println(rel1);
-                System.out.println(rel2);
+                //System.out.println(rel1);
+                //System.out.println(rel2);
                 myDbms.union(rel1, rel2);
-                System.out.println("opQ after remove: " + opQ);
-                opQ.push(UUID.randomUUID().toString()); // pushes a garbage value
+//                System.out.println("opQ after remove: " + opQ);
+                opQ.push("garbage"); // pushes a garbage value
                 System.out.println("opQ after pushing garbage: " + opQ);
             }
             else if (el.equals("-")){
@@ -295,7 +309,7 @@ public class MyRulesBaseListener extends rulesBaseListener{
                 String rel1 = opQ.remove();
                 String rel2 = opQ.remove();
                 //dbms.product(rel1, rel2)
-                opQ.push(UUID.randomUUID().toString()); // pushes a garbage value
+                opQ.push("garbage"); // pushes a garbage value
             }
 
         }

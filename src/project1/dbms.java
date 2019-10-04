@@ -86,33 +86,39 @@ public class dbms {
         //System.out.println("tabName2 idx: " + idx2);
         //if one of them doesn't exist, that means that we use the table from the buffer
         if(idx1 == -1){
-            t1=buffer.remove(0);
-            //System.out.println("t1 garbage: " + t1.attributeValues);
+            t1 = buffer.remove(0);
+        }
+        else{
+            t1 = tableList.get(idx1);
+        }
+        if(idx2 == -1){
+            t2 = buffer.remove(0);
         }
         else
         {
-            t1=tableList.get(idx1);
+            t2=tableList.get(idx2);
         }
-        t2=tableList.get(idx2);
         //create a new table with info from ONE of these tables in the buffer
-        buffer.add(new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
+        //buffer.add(new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
         //System.out.println("initial bufferList: " + buffer.get(0).attributeValues);
         //populate the table with information from tab1 & tab2
+        Table temp = new Table("unionedTable", t1.attributeName, t1.attributeType, t1.primaryKeys);
         for(int i=0; i<t1.attributeValues.size(); i++)
         {
-            Table temp = buffer.get(0);
             temp.insertEntity(t1.attributeValues.get(i));
-            buffer.set(0, temp);
         }
-        //System.out.println("bufferList: "+ buffer.get(0).attributeValues);
         for(int i=0; i<t2.attributeValues.size(); i++)
         {
             //buffer.get(0).insertEntity(t2.attributeValues.get(i));
-            Table temp = buffer.get(0);
+
             temp.insertEntity(t2.attributeValues.get(i));
-            buffer.set(0, temp);
         }
-        //System.out.println("bufferList: " + buffer.get(0).attributeValues);
+        buffer.add(0, temp);
+        //System.out.println("bufferList: "+ buffer.get(0).attributeValues);
+        System.out.println("Table names in buffer");
+        for (Table el : buffer){
+            System.out.println("buffer values: " + el.attributeValues);
+        }
     }
     public void writetoCSV(String tableTitle) throws IOException {
         int rows = 0;
@@ -164,7 +170,7 @@ public class dbms {
         System.out.println("tableTitle: " + tableTitle);
         int tableIdx = findTable(tableTitle);
         if(tableIdx == -1){
-            tableIdx = buffer.size()-1;
+            tableIdx = 0;
             for (String s : buffer.get(tableIdx).attributeName) {
                 System.out.print(s + "\t");
             }
