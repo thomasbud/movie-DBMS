@@ -98,42 +98,52 @@ public class dbms {
         Table temp = new Table("unionedTable", t1.attributeName, t1.attributeType, t1.primaryKeys);
         temp.attributeValues.addAll(t1.attributeValues);
         temp.attributeValues.addAll(t2.attributeValues);
-
-        //old version but we wanted to use what's already there
-        /*for(int i=0; i<t1.attributeValues.size(); i++)
-        {
-            temp.insertEntity(t1.attributeValues.get(i));
-        }
-        for(int i=0; i<t2.attributeValues.size(); i++)
-        {
-            //buffer.get(0).insertEntity(t2.attributeValues.get(i));
-
-            temp.insertEntity(t2.attributeValues.get(i));
-        }*/
-
         buffer.add(0, temp);
         //System.out.println("bufferList: "+ buffer.get(0).attributeValues);
         System.out.println("Table names in buffer");
         for (Table el : buffer){
             System.out.println("buffer values: " + el.attributeValues);
         }
+        System.out.println("Table names in tableList");
+        for(Table l: tableList){
+            System.out.println("table list names: " + l.tableName);
+        }
+    }
+    public void rename(String tabName, String oldName, String newName)
+    {
+        Table t = setTempTable(tabName);
+
+        Collections.replaceAll(t.attributeName, oldName, newName);
+        tableList.set(findTable(tabName), t);
+    }
+    /*
+    public void insert(String tableName, String relName){
+        int idx = findTable(tableName);
+        this.union(tableName, relName);
+        List<List<String>> temp = buffer.get(0).attributeValues;
+        for(List<String> x: temp){
+            System.out.println("x: " + x);
+            tableList.get(idx).insertEntity(x);
+        }
+        buffer.remove(0);
+        System.out.println("tableName: "+ tableList.get(findTable(tableName)).attributeValues);
     }
 
-    public void intersect (String tabName1, String tabName2)
+     */
+    public void intersect(String tabName1, String tabName2)
     {
         Table t1 = setTempTable(tabName1);
         Table t2 = setTempTable(tabName2);
 
         //create a new table with info from the first table
-        buffer.add(new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
+        Table temp = new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys);
 
         //populate the table with the intersection of tab1 & tab2
         t1.attributeValues.retainAll(t2.attributeValues);
-        for(int i=0; i<t1.attributeValues.size(); i++)
-        {
-            buffer.get(0).insertEntity(t1.attributeValues.get(i));
-        }
-        //System.out.println("tableName now: " + buffer.get(0).tableName);
+        temp.attributeValues.addAll(t1.attributeValues);
+
+        buffer.add(0, temp);
+        System.out.println("buffer: " + buffer.get(0).attributeValues);
     }
 
     public void remove(String tabName1, String tabName2)
@@ -151,7 +161,32 @@ public class dbms {
             buffer.get(0).insertEntity(t1.attributeValues.get(i));
         }
     }
-
+    public void select(String tabName, String name, String val, String op) {
+        Table t1 = setTempTable(tabName);
+        Table temp = (new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
+        // search for index of attributeName in tabName
+        System.out.println("name " + name);
+        System.out.println("Attribute names " + t1.attributeName);
+        int col = t1.attributeName.indexOf(name);
+        System.out.println(col);
+        System.out.println("Tables in list");
+        for (Table el : tableList){
+            System.out.println(el.tableName);
+        }
+        switch (op) {
+            case "==":
+                // iterate through attributeValues[col]
+                for (int i = 0; i < t1.attributeValues.size(); i++) {
+                    if (t1.attributeValues.get(i).get(col).equals(val)) {
+                        temp.insertEntity(t1.attributeValues.get(i));
+                    }
+                }
+                buffer.add(0, temp);
+                break;
+        }
+        System.out.println("buffer " + buffer.get(0).attributeValues);
+    }
+    /*
     public void writetoCSV(String tableTitle) throws IOException {
         int rows = 0;
         int cols  = 0;
@@ -197,6 +232,8 @@ public class dbms {
             csvWriter.close();
         }
     }
+
+     */
     public void print(String tableTitle)
     {
         System.out.println("tableTitle: " + tableTitle);
@@ -227,6 +264,5 @@ public class dbms {
                 System.out.println("");
             }
         }
-
     }
 }
