@@ -84,6 +84,120 @@ public class dbms {
         tableList.get(findTable(tableTitle)).insertEntity(valuesIn);
     }
 
+    public void insertFromRelation(String relName, String tableName){
+        if (findTable(tableName) == -1){
+            List<List<String>> valuesFromBuffer = buffer.get(0).attributeValues;
+            for (List<String> el : valuesFromBuffer){
+                this.insertInto(relName, el);
+            }
+        }
+        else{
+            List<List<String>> valuesToInsert = tableList.get(findTable(tableName)).attributeValues;
+            for (List<String> el : valuesToInsert){
+                this.insertInto(relName, el);
+            }
+        }
+    }
+    public void project(String tableName, List<String> attributes)
+    {
+        Table t1 = setTempTable(tableName);
+        // get the locations
+        List<Integer> attrIdx = new ArrayList<Integer>();
+//        for(int i=0; i<t1.attributeName.size(); i++)
+//        {
+//            for(int j=0; j<attributes.size(); j++)
+//            {
+//                if(attributes.get(j).equals(t1.attributeName.get(i))) {
+//                    System.out.println("attributes " + attributes.get(j));
+//                    attrIdx.add(i);
+//                }
+//            }
+//        }
+        for (int i=0; i < attributes.size(); i++){
+            //System.out.println(i);
+            for (int j = 0; j < t1.attributeName.size(); j++){
+                if(attributes.get(i).equals(t1.attributeName.get(j))) {
+                    //System.out.println("attributes " + attributes.get(j));
+                    attrIdx.add(j);
+                }
+            }
+        }
+        // get the types at those positions
+        List<String> types = new ArrayList<String>();
+        for(int i=0; i<attrIdx.size(); i++)
+        {
+            types.add(t1.attributeType.get(attrIdx.get(i)));
+        }
+
+        Table temp = new Table("projectedTable", attributes, types, t1.primaryKeys); //primary keys is iffy
+
+        // add everything relevant data into temp's attributeValues
+        for(int i = 0; i < t1.attributeValues.size(); i++)
+        {
+            List<String> l = new ArrayList<String>();
+            for(int j=0; j<attributes.size(); j++)
+            {
+                l.add(t1.attributeValues.get(i).get(attrIdx.get(j)));
+            }
+            temp.attributeValues.add(l);
+        }
+        temp.attributeValues = removeDuplicates(temp.attributeValues);
+        buffer.add(0, temp);
+    }
+
+    public void update(String tabName, List<String> attributes, List<String> newVal)
+    {
+        Table t1 = setTempTable(tabName);
+        Table t2 = setTempTable("garbageeeees");
+        // get the locations
+        List<Integer> attrIdx = new ArrayList<Integer>();
+        for(int i=0; i<t1.attributeName.size(); i++)
+        {
+            for(int j=0; j<attributes.size(); j++)
+            {
+                if(attributes.get(j).equals(t1.attributeName.get(i)))
+                    attrIdx.add(i);
+            }
+        }
+
+        //find common values
+        List<Integer> commonList = new ArrayList<Integer>();
+        for(int i=0; i<t1.attributeValues.size(); i++)
+        {
+            for(int j=0; j<t2.attributeValues.size(); j++)
+            {
+                if(t1.attributeValues.get(i).equals(t2.attributeValues.get(j)))
+                {
+                    commonList.add(i);
+                }
+            }
+        }
+
+        Table temp = new Table(tabName, t1.attributeName, t1.attributeType, t1.primaryKeys);
+        for(int i = 0; i < t1.attributeValues.size(); i++)
+        {
+            if(commonList.contains(i)) //if it is a common list then we need to update it
+            {
+                List<String> l = new ArrayList<String>();
+                for (int j = 0; j < t1.attributeValues.get(i).size(); j++) {
+                    if (attrIdx.contains(j)) {
+                        l.add(newVal.get(attrIdx.indexOf(j)));
+                    } else {
+                        l.add(t1.attributeValues.get(i).get(j));
+                    }
+                }
+                temp.attributeValues.add(l);
+            }
+            else //otherwise just add the old one
+            {
+                temp.attributeValues.add(t1.attributeValues.get(i));
+            }
+        }
+        tableList.set(findTable(tabName), temp);
+    }
+
+
+
     // Inserts union of new table into tableList
     public void union(String tabName1, String tabName2)
     {
@@ -91,6 +205,9 @@ public class dbms {
         //System.out.println("tabName2: " + tabName2);
         Table t1 = setTempTable(tabName1);
         Table t2 = setTempTable(tabName2);
+        if (findTable(tabName1) == -1 && findTable(tabName2) == -1){
+            t2 = buffer.get(1);
+        }
         //create a new table with info from ONE of these tables in the buffer
         //buffer.add(new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
         //System.out.println("initial bufferList: " + buffer.get(0).attributeValues);
@@ -98,24 +215,27 @@ public class dbms {
         Table temp = new Table("unionedTable", t1.attributeName, t1.attributeType, t1.primaryKeys);
         temp.attributeValues.addAll(t1.attributeValues);
         temp.attributeValues.addAll(t2.attributeValues);
+
+        temp.attributeValues = removeDuplicates(temp.attributeValues);
         buffer.add(0, temp);
         //System.out.println("bufferList: "+ buffer.get(0).attributeValues);
-        System.out.println("Table names in buffer");
-        for (Table el : buffer){
-            System.out.println("buffer values: " + el.attributeValues);
-        }
-        System.out.println("Table names in tableList");
-        for(Table l: tableList){
-            System.out.println("table list names: " + l.tableName);
-        }
+//        for (Table el : buffer){
+//            System.out.println("buffer values: " + el.attributeValues);
+//        }
     }
-    public void rename(String tabName, String oldName, String newName)
+    public void rename(String tabName, List<String> newNames)
     {
         Table t = setTempTable(tabName);
 
-        Collections.replaceAll(t.attributeName, oldName, newName);
-        tableList.set(findTable(tabName), t);
+        for(int i=0; i<newNames.size(); i++)
+        {
+            t.attributeName.set(i, newNames.get(i));
+        }
+
+        buffer.add(0, t);
     }
+
+
     /*
     public void insert(String tableName, String relName){
         int idx = findTable(tableName);
@@ -130,10 +250,45 @@ public class dbms {
     }
 
      */
-    public void intersect(String tabName1, String tabName2)
+    public void difference(String tabName1, String tabName2)
     {
         Table t1 = setTempTable(tabName1);
         Table t2 = setTempTable(tabName2);
+
+        //create a new table with info from the first table
+        Table temp = new Table("differenceTable", t1.attributeName, t1.attributeType, t1.primaryKeys);
+
+        //populate a temp table with stuff that isn't in both
+        boolean notBoth; //exists in only one
+        for(int i=0; i<t1.attributeValues.size(); i++)
+        {
+            notBoth = false;
+            for(int j=0; j<t2.attributeValues.size(); j++)
+            {
+                if(t1.attributeValues.get(i).equals(t2.attributeValues.get(j)))
+                {
+                    notBoth = true;
+                }
+            }
+            if(notBoth)
+            {
+                temp.attributeValues.add(t1.attributeValues.get(i));
+            }
+        }
+        buffer.add(0, temp);
+    }
+
+    public void intersect(String tabName1, String tabName2)
+    {
+        Table t1 = setTempTable(tabName1);
+        Table t2;
+        if (findTable(tabName1) == -1 && findTable(tabName2) == -1){
+            t2 = buffer.get(1);
+        }
+        else{
+            t2 = setTempTable(tabName2);
+        }
+
 
         //create a new table with info from the first table
         Table temp = new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys);
@@ -143,7 +298,40 @@ public class dbms {
         temp.attributeValues.addAll(t1.attributeValues);
 
         buffer.add(0, temp);
-        System.out.println("buffer: " + buffer.get(0).attributeValues);
+        //System.out.println("buffer after intersect" + buffer.get(0).attributeValues);
+    }
+
+    public void product(String tabName1, String tabName2)
+    {
+        Table t1 = setTempTable(tabName1);
+        Table t2 = setTempTable(tabName2);
+
+        //create a new table with info from the first table
+        List<String> combinedAttrList = new ArrayList<>();
+        List<String> combinedTypeList = new ArrayList<>();
+        List<String> combinedKeyList = new ArrayList<>();
+
+        combinedAttrList.addAll(t1.attributeName);
+        combinedAttrList.addAll(t2.attributeName);
+        combinedTypeList.addAll(t1.attributeType);
+        combinedTypeList.addAll(t2.attributeType);
+        combinedKeyList.addAll(t1.primaryKeys);
+        combinedKeyList.addAll(t2.primaryKeys);
+
+        Table temp = new Table("productTable", combinedAttrList, combinedTypeList, combinedKeyList);
+
+        List<String> attrValues = new ArrayList<>();
+        for (int i = 0; i < t1.attributeValues.size(); i++){
+            for (int j = 0; j < t2.attributeValues.size(); j++){
+                attrValues.addAll(t1.attributeValues.get(i));
+                attrValues.addAll(t2.attributeValues.get(j));
+                temp.insertEntity(attrValues);
+                attrValues = new ArrayList<>();
+            }
+        }
+
+        temp.attributeValues = removeDuplicates(temp.attributeValues);
+        buffer.add(0, temp);
     }
 
     public void remove(String tabName1, String tabName2)
@@ -165,14 +353,7 @@ public class dbms {
         Table t1 = setTempTable(tabName);
         Table temp = (new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
         // search for index of attributeName in tabName
-        System.out.println("name " + name);
-        System.out.println("Attribute names " + t1.attributeName);
         int col = t1.attributeName.indexOf(name);
-        System.out.println(col);
-        System.out.println("Tables in list");
-        for (Table el : tableList){
-            System.out.println(el.tableName);
-        }
         switch (op) {
             case "==":
                 // iterate through attributeValues[col]
@@ -183,9 +364,170 @@ public class dbms {
                 }
                 buffer.add(0, temp);
                 break;
+            case ">=":
+                for (int i = 0; i < t1.attributeValues.size(); i++) {
+                    if (Integer.parseInt(t1.attributeValues.get(i).get(col)) >= Integer.parseInt(val)) {
+                        temp.insertEntity(t1.attributeValues.get(i));
+                    }
+                }
+                buffer.add(0, temp);
+            case "<=":
+                for (int i = 0; i < t1.attributeValues.size(); i++) {
+                    if (Integer.parseInt(t1.attributeValues.get(i).get(col)) <= Integer.parseInt(val)) {
+                        temp.insertEntity(t1.attributeValues.get(i));
+                    }
+                }
+                buffer.add(0, temp);
+                break;
+            case ">":
+                for (int i = 0; i < t1.attributeValues.size(); i++) {
+                    if (Integer.parseInt(t1.attributeValues.get(i).get(col)) > Integer.parseInt(val)) {
+                        temp.insertEntity(t1.attributeValues.get(i));
+                    }
+                }
+                buffer.add(0, temp);
+                break;
+            case "<":
+                for (int i = 0; i < t1.attributeValues.size(); i++) {
+                    if (Integer.parseInt(t1.attributeValues.get(i).get(col)) < Integer.parseInt(val)) {
+                        temp.insertEntity(t1.attributeValues.get(i));
+                    }
+                }
+                buffer.add(0, temp);
+                break;
+            case "!=":
+                for (int i = 0; i < t1.attributeValues.size(); i++) {
+                    if (Integer.parseInt(t1.attributeValues.get(i).get(col)) != Integer.parseInt(val)) {
+                        temp.insertEntity(t1.attributeValues.get(i));
+                    }
+                }
+                buffer.add(0, temp);
+                break;
+            case "&&":
+                this.intersect(name, val);
+                break;
+            case "||":
+                this.union(name, val);
+                break;
         }
-        System.out.println("buffer " + buffer.get(0).attributeValues);
     }
+    public void selectAttr(String tabName, String attr1, String attr2, String op) {
+        Table t = setTempTable(tabName);
+        int attr1_idx = 0;
+        int attr2_idx = 0;
+        for(int i = 0; i < t.attributeName.size();i++){
+            if(t.attributeName.get(i).equals(attr1)){
+                attr1_idx = i;
+            }
+            if(t.attributeName.get(i).equals(attr2)){
+                attr2_idx = i;
+            }
+        }
+        Table temp = new Table("selectedTable", t.attributeName, t.attributeType, t.primaryKeys);
+        switch (op) {
+            case "==":
+                // iterate through attributeValues[col]
+                for(int j = 0; j < t.attributeValues.size();j++){
+                    if(t.attributeValues.get(j).get(attr1_idx).equals(t.attributeValues.get(j).get(attr2_idx))){
+                        temp.insertEntity(t.attributeValues.get(j));
+                    }
+                }
+                temp.attributeValues = removeDuplicates(temp.attributeValues);
+                buffer.add(0, temp);
+                break;
+            case ">=":
+                for(int j = 0; j < t.attributeValues.size();j++){
+                    if(Integer.parseInt(t.attributeValues.get(j).get(attr1_idx)) >= Integer.parseInt(t.attributeValues.get(j).get(attr2_idx))){
+                        temp.insertEntity(t.attributeValues.get(j));
+                    }
+                }
+                temp.attributeValues = removeDuplicates(temp.attributeValues);
+                buffer.add(0, temp);
+            case "<=":
+                for(int j = 0; j < t.attributeValues.size();j++){
+                    if(Integer.parseInt(t.attributeValues.get(j).get(attr1_idx)) <= Integer.parseInt(t.attributeValues.get(j).get(attr2_idx))){
+                        temp.insertEntity(t.attributeValues.get(j));
+                    }
+                }
+                temp.attributeValues = removeDuplicates(temp.attributeValues);
+                buffer.add(0, temp);
+                break;
+            case ">":
+                for(int j = 0; j < t.attributeValues.size();j++){
+                    if(Integer.parseInt(t.attributeValues.get(j).get(attr1_idx)) > Integer.parseInt(t.attributeValues.get(j).get(attr2_idx))){
+                        temp.insertEntity(t.attributeValues.get(j));
+                    }
+                }
+                temp.attributeValues = removeDuplicates(temp.attributeValues);
+                buffer.add(0, temp);
+                break;
+            case "<":
+                for(int j = 0; j < t.attributeValues.size();j++){
+                    if(Integer.parseInt(t.attributeValues.get(j).get(attr1_idx)) < Integer.parseInt(t.attributeValues.get(j).get(attr2_idx))){
+                        temp.insertEntity(t.attributeValues.get(j));
+                    }
+                }
+                temp.attributeValues = removeDuplicates(temp.attributeValues);
+                buffer.add(0, temp);
+                break;
+            case "!=":
+                for(int j = 0; j < t.attributeValues.size();j++){
+                    if(!t.attributeValues.get(j).get(attr1_idx).equals(t.attributeValues.get(j).get(attr2_idx))){
+                        temp.insertEntity(t.attributeValues.get(j));
+                    }
+                }
+                temp.attributeValues = removeDuplicates(temp.attributeValues);
+                buffer.add(0, temp);
+                break;
+        }
+    }
+    public void createQueryTable(String newName)
+    {
+        Table t = setTempTable("movethistabletotablelist");
+
+        Table temp = new Table(newName, t.attributeName, t.attributeType, t.primaryKeys);
+        temp.attributeValues.addAll(t.attributeValues);
+        tableList.add(temp);
+    }
+    public List<List<String>> removeDuplicates(List<List<String>> table){
+        Set<List<String>> set = new HashSet<>(table);
+        table.clear();
+        table.addAll(set);
+        return table;
+    }
+    public void deleteFrom(String tabName)
+    {
+        Table t1 = setTempTable(tabName);
+        Table t2 = setTempTable("throwawaaaaaay");
+
+        //find common values
+        List<Integer> commonList = new ArrayList<Integer>();
+        for(int i=0; i<t1.attributeValues.size(); i++)
+        {
+            for(int j=0; j<t2.attributeValues.size(); j++)
+            {
+                if(t1.attributeValues.get(i).equals(t2.attributeValues.get(j)))
+                {
+                    commonList.add(i);
+                }
+            }
+        }
+
+        Table temp = new Table(tabName, t1.attributeName, t1.attributeType, t1.primaryKeys);
+        for(int i = 0; i < t1.attributeValues.size(); i++)
+        {
+            if(!commonList.contains(i)) //if it is not a common list then we need to add it
+            {
+
+                temp.attributeValues.add(t1.attributeValues.get(i));
+            }
+        }
+        tableList.set(findTable(tabName), temp);
+    }
+
+
+
+
     /*
     public void writetoCSV(String tableTitle) throws IOException {
         int rows = 0;
@@ -250,7 +592,7 @@ public class dbms {
                 }
                 System.out.println("");
             }
-            System.out.println("buffer at top: " + buffer.get(tableIdx).attributeValues);
+            //System.out.println("buffer at top: " + buffer.get(tableIdx).attributeValues);
         }
         else{
             for (String s : tableList.get(tableIdx).attributeName) {

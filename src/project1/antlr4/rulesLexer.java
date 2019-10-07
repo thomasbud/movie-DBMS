@@ -1,4 +1,4 @@
-// Generated from C:/Users/sidds/Documents/CSCE 315/PA1/CSCE315Project1/src/project1\rules.g4 by ANTLR 4.7.2
+// Generated from /Users/engrbundle/IdeaProjects/BasicAntlrScript/src/project1/rules.g4 by ANTLR 4.7.2
 package project1.antlr4;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
