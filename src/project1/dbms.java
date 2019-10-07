@@ -63,6 +63,7 @@ public class dbms {
             }
         }
         if(idx == -1){
+            //System.out.println("buffer befor " + buffer.get(0).attributeValues);
             t=buffer.remove(0);
         }
         else
@@ -280,14 +281,15 @@ public class dbms {
 
     public void intersect(String tabName1, String tabName2)
     {
+        System.out.println(" ----------- inside intersect ---------------");
+        System.out.println("buffer before : " + buffer.size());
         Table t1 = setTempTable(tabName1);
-        Table t2;
-        if (findTable(tabName1) == -1 && findTable(tabName2) == -1){
-            t2 = buffer.get(1);
-        }
-        else{
-            t2 = setTempTable(tabName2);
-        }
+        Table t2 = setTempTable(tabName2);
+        //System.out.println("buffer: " + buffer.get(0).attributeValues);
+
+        System.out.println("t1 vals: " + t1.attributeValues);
+
+        System.out.println("t2 vals: " + t2.attributeValues);
 
 
         //create a new table with info from the first table
@@ -299,6 +301,8 @@ public class dbms {
 
         buffer.add(0, temp);
         //System.out.println("buffer after intersect" + buffer.get(0).attributeValues);
+        System.out.println("After the intersect");
+        this.printBuffer();
     }
 
     public void product(String tabName1, String tabName2)
@@ -349,8 +353,17 @@ public class dbms {
             buffer.get(0).insertEntity(t1.attributeValues.get(i));
         }
     }
+    public void printBuffer(){
+        for(int i = 0; i < buffer.size();i++){
+            System.out.println("bufferlist:" + i + " " + buffer.get(i).attributeValues);
+        }
+
+    }
     public void select(String tabName, String name, String val, String op) {
+        System.out.println("----------------- Inside select ----------------------------");
         Table t1 = setTempTable(tabName);
+        System.out.println("Inside select: Whats t1?");
+        System.out.println(t1.attributeValues);
         Table temp = (new Table(t1.tableName, t1.attributeName, t1.attributeType, t1.primaryKeys));
         // search for index of attributeName in tabName
         int col = t1.attributeName.indexOf(name);
@@ -404,6 +417,11 @@ public class dbms {
                 buffer.add(0, temp);
                 break;
             case "&&":
+                System.out.println("before intersect buffer");
+                this.printBuffer();
+                buffer.add(0, t1);
+                System.out.println("After adding it back to buffer");
+                this.printBuffer();
                 this.intersect(name, val);
                 break;
             case "||":
@@ -412,6 +430,10 @@ public class dbms {
         }
     }
     public void selectAttr(String tabName, String attr1, String attr2, String op) {
+        System.out.println("Inside select Attr");
+        System.out.println("attr1 " + attr1);
+        System.out.println("attr2 " + attr2);
+        System.out.println("op " + op);
         Table t = setTempTable(tabName);
         int attr1_idx = 0;
         int attr2_idx = 0;
@@ -429,15 +451,18 @@ public class dbms {
                 // iterate through attributeValues[col]
                 for(int j = 0; j < t.attributeValues.size();j++){
                     if(t.attributeValues.get(j).get(attr1_idx).equals(t.attributeValues.get(j).get(attr2_idx))){
+                        System.out.println(t.attributeValues.get(j));
                         temp.insertEntity(t.attributeValues.get(j));
                     }
                 }
                 temp.attributeValues = removeDuplicates(temp.attributeValues);
                 buffer.add(0, temp);
+                System.out.println("SelectAttr eq: " + buffer.get(0).attributeValues);
                 break;
             case ">=":
                 for(int j = 0; j < t.attributeValues.size();j++){
                     if(Integer.parseInt(t.attributeValues.get(j).get(attr1_idx)) >= Integer.parseInt(t.attributeValues.get(j).get(attr2_idx))){
+                        System.out.println(t.attributeValues.get(j));
                         temp.insertEntity(t.attributeValues.get(j));
                     }
                 }
@@ -446,6 +471,7 @@ public class dbms {
             case "<=":
                 for(int j = 0; j < t.attributeValues.size();j++){
                     if(Integer.parseInt(t.attributeValues.get(j).get(attr1_idx)) <= Integer.parseInt(t.attributeValues.get(j).get(attr2_idx))){
+                        System.out.println(t.attributeValues.get(j));
                         temp.insertEntity(t.attributeValues.get(j));
                     }
                 }
@@ -455,6 +481,7 @@ public class dbms {
             case ">":
                 for(int j = 0; j < t.attributeValues.size();j++){
                     if(Integer.parseInt(t.attributeValues.get(j).get(attr1_idx)) > Integer.parseInt(t.attributeValues.get(j).get(attr2_idx))){
+                        System.out.println(t.attributeValues.get(j));
                         temp.insertEntity(t.attributeValues.get(j));
                     }
                 }
@@ -464,6 +491,7 @@ public class dbms {
             case "<":
                 for(int j = 0; j < t.attributeValues.size();j++){
                     if(Integer.parseInt(t.attributeValues.get(j).get(attr1_idx)) < Integer.parseInt(t.attributeValues.get(j).get(attr2_idx))){
+                        System.out.println(t.attributeValues.get(j));
                         temp.insertEntity(t.attributeValues.get(j));
                     }
                 }
@@ -473,13 +501,17 @@ public class dbms {
             case "!=":
                 for(int j = 0; j < t.attributeValues.size();j++){
                     if(!t.attributeValues.get(j).get(attr1_idx).equals(t.attributeValues.get(j).get(attr2_idx))){
+                        System.out.println(t.attributeValues.get(j));
                         temp.insertEntity(t.attributeValues.get(j));
                     }
                 }
                 temp.attributeValues = removeDuplicates(temp.attributeValues);
                 buffer.add(0, temp);
+                System.out.println("buffer after neq: ");
+                this.printBuffer();
                 break;
         }
+
     }
     public void createQueryTable(String newName)
     {

@@ -465,8 +465,8 @@ public class MyRulesBaseListener extends rulesBaseListener {
     }
 
     private void dbmsSelect(Queue<String> conditionQueue, String tableName) {
-        //System.out.println("INSIDE dbms select ------------------------------------------------------------");
-        //System.out.println("condition Queue" + conditionQueue);
+        System.out.println("INSIDE dbms select ------------------------------------------------------------");
+        System.out.println("condition Queue" + conditionQueue);
         for (String el : conditionQueue) {
             opQ.push(el);
             //System.out.println("opQ " + opQ);
@@ -487,7 +487,7 @@ public class MyRulesBaseListener extends rulesBaseListener {
                     myDbms.select(tableName, attrName, attrValue, el);
                 }
 
-                opQ.push("garbage"); // pushes a garbage value
+                opQ.push("garbage" + el); // pushes a garbage value
                 //System.out.println("opQ after pushing garbage: " + opQ);
             }
 
