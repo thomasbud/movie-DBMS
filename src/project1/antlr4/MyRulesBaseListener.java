@@ -71,70 +71,139 @@ public class MyRulesBaseListener extends rulesBaseListener {
         //System.out.println("------------- exit Query ---------------");
         List<ParseTree> children = ctx.children;
         String tableName = children.get(0).getText();
-        myDbms.createQueryTable(tableName);
+        String potentialName = children.get(2).getText();
+        myDbms.createQueryTable(tableName, potentialName);
     }
     @Override public void exitDifference(rulesParser.DifferenceContext ctx) {
         ParseTree exprNode1 = ctx.children.get(0);
         ParseTree exprNode2 = ctx.children.get(2);
-        //System.out.println(exprNode1.getText());
 
         List<String> expr1Leaves = new ArrayList<>();
         List<String> expr2Leaves = new ArrayList<>();
-        //List<String> passingLeaves = new ArrayList<>();
         getLeafNodes(exprNode1, expr1Leaves);
         getLeafNodes(exprNode2, expr2Leaves);
-        //System.out.println("Expression 1 leaves " + expr1Leaves);
-        //System.out.println("Expression 2 leaves " + expr2Leaves);
         Deque<String> atomicExpr1OpStack = new ArrayDeque<>();
         Queue<String> atomicExpr1Queue = new LinkedList<>();
         Deque<String> atomicExpr2OpStack = new ArrayDeque<>();
         Queue<String> atomicExpr2Queue = new LinkedList<>();
-        //System.out.println("expr1Leaves.size : " + expr1Leaves.size());
-        //System.out.println(expr2Leaves.contains("select"));
-        if ( (exprNode1.getChildCount() == 1) && (exprNode2.getChildCount() == 1)){
+        //A+B
+        if ((exprNode1.getChildCount() == 1) && (exprNode2.getChildCount() == 1)){
             myDbms.difference(exprNode1.getChild(0).getText(), exprNode2.getChild(0).getText());
 
         }
+        //A + (Select..)
         else if ((expr1Leaves.size() == 1) && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))) {
             String tableName = exprNode1.getChild(0).getText();
-            //System.out.println("inputting the garbage tanal");
-            myDbms.difference(tableName, "garbageTanalll");
+            myDbms.difference(tableName, "garbage");
         }
-        else {
+        //(Select..) + A
+        else if ((expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename")) && (expr2Leaves.size() == 1)) {
+            String tableName = exprNode2.getChild(0).getText();
+            //System.out.println("inputting the garbage tanal");
+            myDbms.difference("garbage", tableName);
+        }
+        //(A+B)+A
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename")) && (expr2Leaves.size() == 1)){
+            atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            String tableName = exprNode2.getChild(0).getText();
+            myDbms.difference("garbage", tableName);
+        }
+        //A + (A+B)
+        else if ((expr1Leaves.size() == 1) && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))) {
+            String tableName = exprNode1.getChild(0).getText();
             atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.difference(tableName, "garbage");
+        }
+        // (A+B) + (A+B)
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.difference("garbage", "garbage");
+        }
+        // (Select..) + (Select..)
+        else if ((expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            myDbms.difference("garbage", "garbage");
+        }
+        // (Select..) + (A+B)
+        else if ((expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.difference("garbage", "garbage");
+        }
+        // (A+B) + (Select..)
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            myDbms.difference("garbage", "garbage");
         }
     }
     @Override public void exitProduct(rulesParser.ProductContext ctx) {
         //System.out.println("------------------ Inside exitProduct ---------------------");
         ParseTree exprNode1 = ctx.children.get(0);
         ParseTree exprNode2 = ctx.children.get(2);
-        //System.out.println(exprNode1.getText());
 
         List<String> expr1Leaves = new ArrayList<>();
         List<String> expr2Leaves = new ArrayList<>();
-        //List<String> passingLeaves = new ArrayList<>();
         getLeafNodes(exprNode1, expr1Leaves);
         getLeafNodes(exprNode2, expr2Leaves);
         Deque<String> atomicExpr1OpStack = new ArrayDeque<>();
         Queue<String> atomicExpr1Queue = new LinkedList<>();
         Deque<String> atomicExpr2OpStack = new ArrayDeque<>();
         Queue<String> atomicExpr2Queue = new LinkedList<>();
-        //System.out.println("expr1Leaves.size : " + expr1Leaves.size());
-        //System.out.println(expr2Leaves.contains("select"));
-        if ( (exprNode1.getChildCount() == 1) && (exprNode2.getChildCount() == 1)){
+        //A+B
+        if ((exprNode1.getChildCount() == 1) && (exprNode2.getChildCount() == 1)){
             myDbms.product(exprNode1.getChild(0).getText(), exprNode2.getChild(0).getText());
 
         }
+        //A + (Select..)
         else if ((expr1Leaves.size() == 1) && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))) {
             String tableName = exprNode1.getChild(0).getText();
+            myDbms.product(tableName, "garbage");
+        }
+        //(Select..) + A
+        else if ((expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename")) && (expr2Leaves.size() == 1)) {
+            String tableName = exprNode2.getChild(0).getText();
             //System.out.println("inputting the garbage tanal");
-            myDbms.product(tableName, "garbageTanalll");
+            myDbms.product("garbage", tableName);
         }
-        else {
+        //(A+B)+A
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename")) && (expr2Leaves.size() == 1)){
+            atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            String tableName = exprNode2.getChild(0).getText();
+            myDbms.product("garbage", tableName);
+        }
+        //A + (A+B)
+        else if ((expr1Leaves.size() == 1) && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))) {
+            String tableName = exprNode1.getChild(0).getText();
             atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.product(tableName, "garbage");
         }
-
-        //System.out.println("----------------------------------------------------");
+        // (A+B) + (A+B)
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.product("garbage", "garbage");
+        }
+        // (Select..) + (Select..)
+        else if ((expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            myDbms.product("garbage", "garbage");
+        }
+        // (Select..) + (A+B)
+        else if ((expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.product("garbage", "garbage");
+        }
+        // (A+B) + (Select..)
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            myDbms.product("garbage", "garbage");
+        }
     }
     @Override
     public void exitCreate_cmd(rulesParser.Create_cmdContext ctx) {
@@ -334,42 +403,67 @@ public class MyRulesBaseListener extends rulesBaseListener {
         //System.out.println("------------------ Inside exitUnion ---------------------");
         ParseTree exprNode1 = ctx.children.get(0);
         ParseTree exprNode2 = ctx.children.get(2);
-        //System.out.println(exprNode1.getText());
 
         List<String> expr1Leaves = new ArrayList<>();
         List<String> expr2Leaves = new ArrayList<>();
-        //List<String> passingLeaves = new ArrayList<>();
         getLeafNodes(exprNode1, expr1Leaves);
         getLeafNodes(exprNode2, expr2Leaves);
-        //System.out.println("Expression 1 leaves " + expr1Leaves);
-        //System.out.println("Expression 2 leaves " + expr2Leaves);
         Deque<String> atomicExpr1OpStack = new ArrayDeque<>();
         Queue<String> atomicExpr1Queue = new LinkedList<>();
         Deque<String> atomicExpr2OpStack = new ArrayDeque<>();
         Queue<String> atomicExpr2Queue = new LinkedList<>();
-        //System.out.println("expr1Leaves.size : " + expr1Leaves.size());
-        //System.out.println(expr2Leaves.contains("select"));
-        if ( (exprNode1.getChildCount() == 1) && (exprNode2.getChildCount() == 1)){
+        //A+B
+        if ((exprNode1.getChildCount() == 1) && (exprNode2.getChildCount() == 1)){
             myDbms.union(exprNode1.getChild(0).getText(), exprNode2.getChild(0).getText());
 
         }
+        //A + (Select..)
         else if ((expr1Leaves.size() == 1) && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))) {
             String tableName = exprNode1.getChild(0).getText();
-           //System.out.println("inputting the garbage tanal");
-            myDbms.union(tableName, "garbageTanalll");
+            myDbms.union(tableName, "garbage");
         }
-        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))){
+        //(Select..) + A
+        else if ((expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename")) && (expr2Leaves.size() == 1)) {
+            String tableName = exprNode2.getChild(0).getText();
+            //System.out.println("inputting the garbage tanal");
+            myDbms.union("garbage", tableName);
+        }
+        //(A+B)+A
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename")) && (expr2Leaves.size() == 1)){
             atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            String tableName = exprNode2.getChild(0).getText();
+            myDbms.union("garbage", tableName);
         }
-        else {
+        //A + (A+B)
+        else if ((expr1Leaves.size() == 1) && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))) {
+            String tableName = exprNode1.getChild(0).getText();
             atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.union(tableName, "garbage");
         }
-
-
-
-        //System.out.println("----------------------------------------------------");
-
-
+        // (A+B) + (A+B)
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.union("garbage", "garbage");
+        }
+        // (Select..) + (Select..)
+        else if ((expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            myDbms.union("garbage", "garbage");
+        }
+        // (Select..) + (A+B)
+        else if ((expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && !(expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr2Leaves, atomicExpr2OpStack, atomicExpr2Queue, opQ);
+            myDbms.union("garbage", "garbage");
+        }
+        // (A+B) + (Select..)
+        else if (!(expr1Leaves.contains("select") || expr1Leaves.contains("project") || expr1Leaves.contains("rename"))
+                && (expr2Leaves.contains("select") || expr2Leaves.contains("project") || expr2Leaves.contains("rename"))){
+            atomicExprShunting(expr1Leaves, atomicExpr1OpStack, atomicExpr1Queue, opQ);
+            myDbms.union("garbage", "garbage");
+        }
     }
 
     private void getLeafNodes(ParseTree node, List<String> leaves) {
@@ -395,6 +489,8 @@ public class MyRulesBaseListener extends rulesBaseListener {
     }
 
     private void atomicExprShunting(List<String> exprLeaves, Deque<String> atomicExprOpStack, Queue<String> atomicExprQueue, Deque<String> opQ) {
+        //System.out.println("inside ---------- atomic expr shunting");
+        //System.out.println("expr Leaves " + exprLeaves);
         for (String el : exprLeaves) {
             if (!isCombiningOp(el) && !isRelAlgebraOp(el)) {
                 atomicExprQueue.add(el);
@@ -430,13 +526,14 @@ public class MyRulesBaseListener extends rulesBaseListener {
                 String rel2 = opQ.remove();
                 opQ.push(UUID.randomUUID().toString()); // pushes a garbage value
             }
-            if (el.equals("*")) {
+            else if (el.equals("*")) {
                 // Look at previous two elements in OpQ
+                //System.out.println("in atomic expression shunting -----------");
                 opQ.remove(); // remove +
                 String rel1 = opQ.remove();
                 String rel2 = opQ.remove();
                 //System.out.println("about to call product");
-                myDbms.product(rel1, rel2);
+                myDbms.product(rel2, rel1);
                 opQ.push("garbage"); // pushes a garbage value
             }
 
@@ -465,8 +562,9 @@ public class MyRulesBaseListener extends rulesBaseListener {
     }
 
     private void dbmsSelect(Queue<String> conditionQueue, String tableName) {
-        System.out.println("INSIDE dbms select ------------------------------------------------------------");
-        System.out.println("condition Queue" + conditionQueue);
+        //System.out.println("INSIDE dbms select ------------------------------------------------------------");
+        //System.out.println("condition Queue" + conditionQueue);
+        myDbms.setTableForSelect(tableName);
         for (String el : conditionQueue) {
             opQ.push(el);
             //System.out.println("opQ " + opQ);
@@ -480,10 +578,13 @@ public class MyRulesBaseListener extends rulesBaseListener {
                 //System.out.println("attrValue " + attrValue);
                 //System.out.println("attrName " + attrName);
                 if (!attrValue.contains("\"") && isConditionOp(el) && !isNumeric(attrValue)){
-
+                    //System.out.println("In select attr for no reason -----------------------------------------------------");
                     myDbms.selectAttr(tableName, attrName, attrValue, el);
                 }
                 else{
+                    if (el.equals(">")){
+                        //System.out.println("el is correct --------------------------------------------------------------------------------------------------------------------------------");
+                    }
                     myDbms.select(tableName, attrName, attrValue, el);
                 }
 
