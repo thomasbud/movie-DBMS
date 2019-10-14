@@ -28,19 +28,24 @@ public class Main {
         List<Movie> moviesList = parser2.deserializeMovies("C:/Users/sidds/Downloads/movies_single.json");
         List<Credits> creditsList = parser2.deserializeCredits("C:/Users/sidds/Downloads/credits_single.json");
 
+
         Movie movie = moviesList.get(0);
+        System.out.println("movie: ");
+        System.out.println(movie);
         Credits credits = creditsList.get(0);
+
 
         System.out.println("Is it an adult film? ");
         System.out.println(movie.getAdult());
         System.out.println();
+
 
         System.out.println("What language was the movie in?");
         System.out.println(movie.getSpoken_languages().get(0).getName());
 
 
 
-/*
+
 
         File file = new File("src/project1/input.txt");
         Scanner scanner = new Scanner(file);
@@ -66,6 +71,5 @@ public class Main {
         }
     }
 
- */
+
     }
-}
