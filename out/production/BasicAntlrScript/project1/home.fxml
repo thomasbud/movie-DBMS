@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"  fx:controller="project1.Controller">
+   <children>
+      <Button layoutX="31.0" layoutY="31.0" mnemonicParsing="false" onAction="#display1" prefWidth="85.5" text="Constellation" />
+      <Button layoutX="31.0" layoutY="69.0" mnemonicParsing="false" onAction="#display2" prefWidth="85.5" text="Typecasting" />
+      <Button layoutX="31.0" layoutY="108.0" mnemonicParsing="false" onAction="#display3" prefWidth="85.5" text="Cover Roles" />
+   </children>
+</AnchorPane>
