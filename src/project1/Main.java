@@ -25,8 +25,8 @@ public class Main {
 
         MovieDatabaseParser parser2 = new MovieDatabaseParser();
 
-        List<Movie> moviesList = parser2.deserializeMovies("C:/Users/sidds/Downloads/movies_single.json");
-        List<Credits> creditsList = parser2.deserializeCredits("C:/Users/sidds/Downloads/credits_single.json");
+        List<Movie> moviesList = parser2.deserializeMovies("C:/Users/shawn/Desktop/Fall 2019/CSCE 315/Project_1/movies_single.json");
+        List<Credits> creditsList = parser2.deserializeCredits("C:/Users/shawn/Desktop/Fall 2019/CSCE 315/Project_1/credits_single.json");
 
 
         Movie movie = moviesList.get(0);
@@ -42,10 +42,6 @@ public class Main {
 
         System.out.println("What language was the movie in?");
         System.out.println(movie.getSpoken_languages().get(0).getName());
-
-
-
-
 
         File file = new File("src/project1/input.txt");
         Scanner scanner = new Scanner(file);
