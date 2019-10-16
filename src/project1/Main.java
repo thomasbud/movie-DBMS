@@ -1,5 +1,8 @@
 package project1;
 
+import csce315.project1.Credits;
+import csce315.project1.Movie;
+import csce315.project1.MovieDatabaseParser;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,6 +19,7 @@ import project1.antlr4.rulesParser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -31,29 +35,7 @@ public class Main extends Application {
     }
 
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws IOException {
         launch(args);
-
-        File file = new File("src/project1/input.txt");
-        Scanner scanner = new Scanner(file);
-        List<String> lines = new ArrayList<>();
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            if (line.length() != 0) {
-                lines.add(line);
-            }
-        }
-        MyRulesBaseListener listener = new MyRulesBaseListener();
-        for (String line : lines) {
-            CharStream charStream = CharStreams.fromString(line);
-            rulesLexer lexer = new rulesLexer(charStream);
-            CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-            rulesParser parser = new rulesParser(commonTokenStream);
-            lexer.removeErrorListeners();
-            parser.removeErrorListeners();
-            rulesParser.ProgramContext programContext = parser.program();
-            ParseTreeWalker walker = new ParseTreeWalker();
-            walker.walk((ParseTreeListener) listener, programContext);
-        }
     }
 }

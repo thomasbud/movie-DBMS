@@ -10,5 +10,4 @@ INSERT INTO animals4 VALUES FROM ("Po", "panda", 15);
 CREATE TABLE animals5 (name VARCHAR(20), kind VARCHAR(8), years INTEGER) PRIMARY KEY (name, kind);
 INSERT INTO animals5 VALUES FROM ("Tigress", "tiger", 13);
 zoo <- (animals4 + animals5) + (select (kind == "cat" || (kind == "dog" && years > 3)) (animals1 + (animals2 + animals3)));
-SHOW zoo;
 EXIT;
