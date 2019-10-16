@@ -10,10 +10,10 @@
         <Button layoutX="31.0" layoutY="31.0" mnemonicParsing="false" onAction="#display1" prefWidth="85.5" text="Constellation" />
         <Button layoutX="31.0" layoutY="69.0" mnemonicParsing="false" onAction="#display2" prefWidth="85.5" text="Typecasting" />
         <Button layoutX="31.0" layoutY="108.0" mnemonicParsing="false" onAction="#display3" prefWidth="85.5" text="Cover Roles" />
-        <TextField fx:id="text1" layoutX="320.0" layoutY="50.0" />
-        <TextField fx:id="text2" layoutX="320.0" layoutY="104.0" />
+        <TextField fx:id="text1_1" layoutX="320.0" layoutY="50.0" />
+        <TextField fx:id="text1_2" layoutX="320.0" layoutY="104.0" />
       <Text layoutX="320.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter an actor name" />
       <Text layoutX="320.0" layoutY="100.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter number of co-star appearances" />
-      <Button layoutX="467.0" layoutY="104.0" mnemonicParsing="false" text="Go!" />
+      <Button layoutX="467.0" layoutY="104.0" mnemonicParsing="false" text="Go!" onAction="#handleButton1"/>
     </children>
 </AnchorPane>

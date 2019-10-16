@@ -25,9 +25,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("home.fxml"));
-
         Scene scene = new Scene(root);
-
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -44,7 +42,6 @@ public class Main extends Application {
             if (line.length() != 0) {
                 lines.add(line);
             }
-
         }
         MyRulesBaseListener listener = new MyRulesBaseListener();
         for (String line : lines) {
