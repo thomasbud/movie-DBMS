@@ -44,7 +44,7 @@ public class Main extends Application {
             }
         }
         MyRulesBaseListener listener = new MyRulesBaseListener();
-        for (String line : lines) {
+        for (String line : lines){
             CharStream charStream = CharStreams.fromString(line);
             rulesLexer lexer = new rulesLexer(charStream);
             CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);

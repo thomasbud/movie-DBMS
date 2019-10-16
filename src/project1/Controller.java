@@ -7,6 +7,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -23,7 +24,8 @@ public class Controller implements Initializable {
     TextField text2_1;
     @FXML
     TextField text3_1;
-
+    @FXML
+    Label label_one;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
     }
@@ -67,6 +69,7 @@ public class Controller implements Initializable {
             String input2 = text1_2.getText();
             System.out.println(input1);
             System.out.println(input2);
+            label_one.setText("Hullo");
         }
     }
     @FXML
