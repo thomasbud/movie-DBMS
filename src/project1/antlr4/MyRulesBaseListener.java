@@ -12,7 +12,7 @@ import java.text.ParsePosition;
 import java.util.*;
 
 public class MyRulesBaseListener extends rulesBaseListener {
-    private dbms myDbms;
+    public static dbms myDbms;
     private Deque<String> opQ;
 
     public MyRulesBaseListener() {

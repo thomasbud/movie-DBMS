@@ -17,15 +17,15 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import project1.antlr4.MyRulesBaseListener;
 import project1.antlr4.rulesLexer;
 import project1.antlr4.rulesParser;
+import project1.antlr4.MyRulesBaseListener;
+import project1.dbms;
 import csce315.project1.Credits;
 import csce315.project1.Movie;
 import csce315.project1.MovieDatabaseParser;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Controller implements Initializable {
@@ -84,15 +84,62 @@ public class Controller implements Initializable {
         }
     }
     @FXML
-    void handleButton2(ActionEvent event){    //Typecasting
+    void handleButton2(ActionEvent event) throws IOException {    //Typecasting
         if(text2_1.getText().isEmpty()){
             System.out.println("Error text field 1 empty");
         }
         else{
             String input1 = text2_1.getText();
             System.out.println(input1);
+            MovieDatabaseParser parser2 = new MovieDatabaseParser();
+            List<Movie> moviesList = parser2.deserializeMovies("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\movies.json");
+            List<Credits> creditsList = parser2.deserializeCredits("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\credits.json");
+            List<Integer> id_list = new ArrayList<>();
+            Map<String, Integer> genreList = new HashMap<String,Integer>();
+            for(int i = 0; i < creditsList.size();i++){
+                for(int j = 0; j < creditsList.get(i).getCastMember().size();j++){
+                    if(creditsList.get(i).getCastMember().get(j).getName().equals(input1)){
+                        id_list.add(Integer.parseInt(creditsList.get(i).getId()));
+                    }
+                }
+            }
+            if(id_list.size() == 0){
+                System.out.println("The input you entered did not match any results");
+            }
+            else{
+                int pos = 0;
+                for(int k = 0; k < moviesList.size();k++){
+                    if(moviesList.get(k).getId() == id_list.get(pos)){
+                        pos++;
+                        int genreObjectSize = moviesList.get(k).getGenres().size();
+                        for(int m = 0; m < genreObjectSize; m++){
+                            String genre = moviesList.get(k).getGenres().get(m).getName();
+                            if(genreList.containsKey(genre)){
+                                int index = genreList.get(genre);
+                                genreList.put(genre, genreList.get(genre) + 1);
+                            }
+                            else{
+                                genreList.put(genre,0);
+                            }
+                        }
+                    }
+                }
+                int freq = 0;
+                String answer = "";
+                for(Map.Entry<String,Integer> entry: genreList.entrySet()){
+                    String genre = entry.getKey();
+                    Integer genre_freq = entry.getValue();
+                    if(genre_freq > freq){
+                        freq = genre_freq;
+                        answer = genre;
+                    }
+                }
+                System.out.println("The most common genre is " + answer + " and the frequency is " + freq);
+
+            }
         }
     }
+
     @FXML
     void handleButton3(ActionEvent event) throws IOException {    //Cover Roles
         if(text3_1.getText().isEmpty()){
@@ -113,17 +160,16 @@ public class Controller implements Initializable {
             for (Credits el : creditsList){
                 for (Credits.CastMember x: el.getCastMember()){
                     String characterName = x.getCharacter().replaceAll(" \\(voice\\)", "").replaceAll(" ", "_").replaceAll("\\.", "");
-                    if (Pattern.matches("[a-zA-Z_0-9]*", characterName)){
+                    String actorName = x.getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "");
+                    if (Pattern.matches("[a-zA-Z_0-9]*", characterName) && Pattern.matches("[a-zA-Z_0-9]*", actorName)){
                         allCharacters.add(characterName);
-                    }
-
-                    String actorName = x.getName().replaceAll(" ", "_").replaceAll("\\.", "");
-
-                    if (Pattern.matches("[a-zA-Z_0-9]*", actorName)){
                         allActors.add(actorName);
                     }
                 }
             }
+
+
+
 //            System.out.println("All Characters: --------------------");
 //            for (String el : allCharacters){
 //                System.out.println(el);
@@ -133,8 +179,8 @@ public class Controller implements Initializable {
 //                System.out.println(el);
 //            }
 
-            System.out.println(allActors.size());
-            System.out.println(allCharacters.size());
+           //System.out.println(allActors.size());
+            //System.out.println(allCharacters.size());
 
             List<String> lines = new ArrayList<>();
 
@@ -147,9 +193,10 @@ public class Controller implements Initializable {
             //lines.add("SHOW ActorsAndChars");
             //Project (actor) (select (character == “name”) credits_table
 
-            lines.add("a <- project (actor) (select (character == \"" + input1+ "\") ActorsAndChars");
+            lines.add("a <- (project (actor) (select (character == \"" + input1 + "\") ActorsAndChars))");
 
-            lines.add("SHOW a");
+            //lines.add("SHOW a");
+
 
             //System.out.println(lines);
             MyRulesBaseListener listener = new MyRulesBaseListener();
@@ -164,6 +211,15 @@ public class Controller implements Initializable {
                 ParseTreeWalker walker = new ParseTreeWalker();
                 walker.walk((ParseTreeListener) listener, programContext);
             }
+
+            List<List<String>> Hullo = MyRulesBaseListener.myDbms.getTable("a");
+            System.out.println(Hullo);
+            String output = "";
+            for (int i = 0; i < Hullo.size(); i++){
+                output += output + Hullo.get(i).get(0) + ", ";
+            }
+            output = output.substring(0, output.length()-2).replaceAll("\"", "");
+            System.out.println(output);
         }
     }
 }

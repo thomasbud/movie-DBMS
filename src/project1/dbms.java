@@ -39,6 +39,9 @@ public class dbms {
     private Table tableForSelect = new Table();
 
     // public members
+    public List<List<String>> getTable(String tableName){
+        return tableList.get(findTable(tableName)).attributeValues;
+    }
     private int findTable(String tableTitle)
     {
         for(int i = 0; i < tableList.size(); i++)   
