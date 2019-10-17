@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.antlr.v4.runtime.CharStream;
@@ -40,6 +41,10 @@ public class Controller implements Initializable {
     TextField text3_1;
     @FXML
     Label label_one;
+    @FXML
+    Label label_two;
+    @FXML
+    TextArea label_three;
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
     }
@@ -92,56 +97,79 @@ public class Controller implements Initializable {
             System.out.println("Error text field 1 empty");
         }
         else{
+            List<String> lines = new ArrayList<>();
+            lines.add("CREATE TABLE ActorTable (cast_id INTEGER, actor VARCHAR(30)) PRIMARY KEY (cast_id, actor)");
+            lines.add("CREATE TABLE MovieTable (movie_id INTEGER, genre VARCHAR(30)) PRIMARY KEY (movie_id, genre)");
             String input1 = text2_1.getText();
-            System.out.println(input1);
             MovieDatabaseParser parser2 = new MovieDatabaseParser();
             List<Movie> moviesList = parser2.deserializeMovies("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\movies.json");
             List<Credits> creditsList = parser2.deserializeCredits("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\credits.json");
-            List<Integer> id_list = new ArrayList<>();
+            List<String> allActors = new ArrayList<>();
+            List<Integer> allcIds = new ArrayList<>();
+            List<Integer> allmIds = new ArrayList<>();
+            for(int i = 0; i < 20;i++){
+                allcIds.add(Integer.parseInt(creditsList.get(i).getId()));
+                for(int j = 0; j < creditsList.get(i).getCastMember().size(); j++){
+                    String actorName = creditsList.get(i).getCastMember().get(j).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "");
+                    if (Pattern.matches("[a-zA-Z_0-9]*", actorName)){
+                        lines.add("INSERT INTO ActorTable VALUES FROM (" +  allcIds.get(i)  + ", \"" + actorName + "\")");
+                    }
+                }
+            }
+            for(int m = 0; m < 20; m++){
+                for(int n = 0; n < moviesList.get(m).getGenres().size();n++) {
+                    //System.out.println(moviesList.get(m).getGenres().get(n).getName());
+                    //System.out.println(moviesList.get(m).getId());
+                    lines.add("INSERT INTO MovieTable VALUES FROM (" +  moviesList.get(m).getId() + ", \"" + moviesList.get(m).getGenres().get(n).getName() + "\")");
+                }
+            }
+            //lines.add("SHOW ActorTable");
+            //lines.add("SHOW MovieTable");
+            lines.add("temp <- select (actor == \"" + input1 +  "\") ActorTable");
+            //lines.add("SHOW temp");
+            lines.add("temp2 <- MovieTable * temp");
+            lines.add("resultTable <- select (movie_id == cast_id) temp2");
+            lines.add("SHOW resultTable");
+            MyRulesBaseListener listener = new MyRulesBaseListener();
+            for (String line : lines) {
+                CharStream charStream = CharStreams.fromString(line);
+                rulesLexer lexer = new rulesLexer(charStream);
+                CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
+                rulesParser parser = new rulesParser(commonTokenStream);
+                lexer.removeErrorListeners();
+                parser.removeErrorListeners();
+                rulesParser.ProgramContext programContext = parser.program();
+                ParseTreeWalker walker = new ParseTreeWalker();
+                walker.walk((ParseTreeListener) listener, programContext);
+            }
             Map<String, Integer> genreList = new HashMap<String,Integer>();
-            for(int i = 0; i < creditsList.size();i++){
-                for(int j = 0; j < creditsList.get(i).getCastMember().size();j++){
-                    if(creditsList.get(i).getCastMember().get(j).getName().equals(input1)){
-                        id_list.add(Integer.parseInt(creditsList.get(i).getId()));
-                    }
+            String genre = "";
+            int index = 0;
+            List<List<String>> resultTable = MyRulesBaseListener.myDbms.getTable("resultTable");
+            for(int w = 0; w < resultTable.size();w++){
+                genre = resultTable.get(w).get(1);
+                if(genreList.containsKey(genre)){
+                    index = genreList.get(genre);
+                    genreList.put(genre, genreList.get(genre) + 1);
+                }
+                else{
+                    genreList.put(genre,1);
                 }
             }
-            if(id_list.size() == 0){
-                System.out.println("The input you entered did not match any results");
-            }
-            else{
-                int pos = 0;
-                for(int k = 0; k < moviesList.size();k++){
-                    if(moviesList.get(k).getId() == id_list.get(pos)){
-                        pos++;
-                        int genreObjectSize = moviesList.get(k).getGenres().size();
-                        for(int m = 0; m < genreObjectSize; m++){
-                            String genre = moviesList.get(k).getGenres().get(m).getName();
-                            if(genreList.containsKey(genre)){
-                                int index = genreList.get(genre);
-                                genreList.put(genre, genreList.get(genre) + 1);
-                            }
-                            else{
-                                genreList.put(genre,0);
-                            }
-                        }
-                    }
+            int freq = 0;
+            String answer = "";
+            for(Map.Entry<String,Integer> entry: genreList.entrySet()){
+                String genre_name = entry.getKey();
+                Integer genre_freq = entry.getValue();
+                if(genre_freq > freq){
+                    freq = genre_freq;
+                    answer = genre_name;
                 }
-                int freq = 0;
-                String answer = "";
-                for(Map.Entry<String,Integer> entry: genreList.entrySet()){
-                    String genre = entry.getKey();
-                    Integer genre_freq = entry.getValue();
-                    if(genre_freq > freq){
-                        freq = genre_freq;
-                        answer = genre;
-                    }
-                }
-                System.out.println("The most common genre is " + answer + " and the frequency is " + freq);
-
             }
+            System.out.println("The most common genre is " + answer + " and the frequency is " + freq);
         }
-    }
+
+        }
 
     @FXML
     void handleButton3(ActionEvent event) throws IOException {    //Cover Roles
@@ -153,8 +181,8 @@ public class Controller implements Initializable {
             System.out.println(input1);
             MovieDatabaseParser parser2 = new MovieDatabaseParser();
 
-            List<Movie> moviesList = parser2.deserializeMovies("/Users/engrbundle/Downloads/movies_single.json");
-            List<Credits> creditsList = parser2.deserializeCredits("/Users/engrbundle/Downloads/dataJSON2/credits.json");
+            //List<Movie> moviesList = parser2.deserializeMovies("/Users/engrbundle/Downloads/movies_single.json");
+            List<Credits> creditsList = parser2.deserializeCredits("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\credits.json");
 
             //For Query
             List<String> allCharacters = new ArrayList<>();
@@ -217,12 +245,14 @@ public class Controller implements Initializable {
 
             List<List<String>> Hullo = MyRulesBaseListener.myDbms.getTable("a");
             System.out.println(Hullo);
-            String output = "";
+            //String output = "";
             for (int i = 0; i < Hullo.size(); i++){
-                output += output + Hullo.get(i).get(0) + ", ";
+                label_three.setText(label_three.getText() + Hullo.get(i).get(0) + "\n");
             }
-            output = output.substring(0, output.length()-2).replaceAll("\"", "");
-            System.out.println(output);
+            //System.out.println(output);
+//            output = output.substring(0, output.length()-2).replaceAll("\"", "");
+//            label_three.setText(output);
+//            System.out.println(output);
         }
     }
 }
