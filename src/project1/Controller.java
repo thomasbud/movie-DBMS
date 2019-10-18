@@ -25,8 +25,10 @@ import csce315.project1.Credits;
 import csce315.project1.Movie;
 import csce315.project1.MovieDatabaseParser;
 
+import javax.crypto.spec.PSource;
 import java.io.IOException;
 import java.net.URL;
+import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -86,23 +88,27 @@ public class Controller implements Initializable {
         else{
             List<String> lines = new ArrayList<>();
             lines.add("CREATE TABLE CoStars (actor VARCHAR(30)) PRIMARY KEY (actor)");
-            String input1 = text1_1.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","");
-            String input2 = text1_2.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","");
+            String input1 = text1_1.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","").replaceAll("-","_").replaceAll("\t", "");
+            String input2 = text1_2.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","").replaceAll("-","_").replaceAll("\t", "");
             MovieDatabaseParser parser2 = new MovieDatabaseParser();
             List<Credits> creditsList = parser2.deserializeCredits("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\credits.json");
-            for(int i = 0; i < 541;i++){
+            for(int i = 0; i < creditsList.size();i++){
                 for(int j = 0; j < creditsList.get(i).getCastMember().size(); j++){
-                    String actorName = creditsList.get(i).getCastMember().get(j).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","");
-                    if (Pattern.matches("[a-zA-Z_0-9]*", actorName) && actorName.equals(input1)){
-                        for(int k = 0; k < creditsList.get(i).getCastMember().size(); k++){
-                            if(!actorName.equals(creditsList.get(i).getCastMember().get(k).getName())){
-                                lines.add("INSERT INTO CoStars VALUES FROM (\"" + creditsList.get(i).getCastMember().get(k).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","") + "\")");
+                    String actorName = creditsList.get(i).getCastMember().get(j).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("\t", "").replaceAll("'", "").replaceAll(",","").replaceAll("-","_");
+                        if(Pattern.matches("[a-zA-Z_0-9]*", actorName) && actorName.equals(input1)){
+                            for(int k = 0; k < creditsList.get(i).getCastMember().size(); k++){
+                                if(!(actorName.equals(creditsList.get(i).getCastMember().get(k).getName()))){
+                                    String a = Normalizer.normalize((creditsList.get(i).getCastMember().get(k).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("-","_").replaceAll("'", "").replaceAll("\t", "").replaceAll(",","")), Normalizer.Form.NFD);
+                                    a = a.replaceAll("[^\\p{ASCII}]", "");
+
+                                    lines.add("INSERT INTO CoStars VALUES FROM (\"" + a + "\")");
+
+                                }
                             }
                         }
-                    }
                 }
             }
-            int count = 0;
+            lines.add("SHOW CoStars");
             for(String s: lines){
                 System.out.println(s);
             }
@@ -144,7 +150,7 @@ public class Controller implements Initializable {
             }
             else{
                 for (String s: CoActorList){
-                    label_one.setText(label_one.getText() + s + "\n");
+                    label_one.setText(label_one.getText() + s + " "  + "\n");
                 }
             }
         }
