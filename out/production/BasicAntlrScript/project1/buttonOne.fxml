@@ -17,7 +17,7 @@
       <Text layoutX="320.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter an actor name" />
       <Text layoutX="320.0" layoutY="100.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter number of co-star appearances" />
       <Button layoutX="467.0" layoutY="104.0" mnemonicParsing="false" onAction="#handleButton1" text="Go!" />
-      <TextArea layoutX="175.0" layoutY="175.0" prefHeight="200.0" prefWidth="200.0" />
+      <TextArea layoutX="175.0" fx:id="label_one" layoutY="175.0" prefHeight="200.0" prefWidth="200.0" />
       <Label layoutX="251.0" layoutY="146.0" text="Output" />
     </children>
 </AnchorPane>

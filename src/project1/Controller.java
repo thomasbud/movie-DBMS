@@ -40,9 +40,9 @@ public class Controller implements Initializable {
     @FXML
     TextField text3_1;
     @FXML
-    Label label_one;
+    TextArea label_one;
     @FXML
-    Label label_two;
+    TextArea label_two;
     @FXML
     TextArea label_three;
     @Override
@@ -79,16 +79,74 @@ public class Controller implements Initializable {
         window.show();
     }
     @FXML
-    void handleButton1(ActionEvent event){    //Constellation
+    void handleButton1(ActionEvent event) throws IOException {    //Constellation
         if(text1_1.getText().isEmpty() || text1_2.getText().isEmpty()) {
             System.out.println("Error text field 1 or text field 2 is empty");
         }
         else{
-            String input1 = text1_1.getText();
-            String input2 = text1_2.getText();
-            System.out.println(input1);
-            System.out.println(input2);
-            label_one.setText("Hullo");
+            List<String> lines = new ArrayList<>();
+            lines.add("CREATE TABLE CoStars (actor VARCHAR(30)) PRIMARY KEY (actor)");
+            String input1 = text1_1.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","");
+            String input2 = text1_2.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","");
+            MovieDatabaseParser parser2 = new MovieDatabaseParser();
+            List<Credits> creditsList = parser2.deserializeCredits("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\credits.json");
+            for(int i = 0; i < 541;i++){
+                for(int j = 0; j < creditsList.get(i).getCastMember().size(); j++){
+                    String actorName = creditsList.get(i).getCastMember().get(j).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","");
+                    if (Pattern.matches("[a-zA-Z_0-9]*", actorName) && actorName.equals(input1)){
+                        for(int k = 0; k < creditsList.get(i).getCastMember().size(); k++){
+                            if(!actorName.equals(creditsList.get(i).getCastMember().get(k).getName())){
+                                lines.add("INSERT INTO CoStars VALUES FROM (\"" + creditsList.get(i).getCastMember().get(k).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","") + "\")");
+                            }
+                        }
+                    }
+                }
+            }
+            int count = 0;
+            for(String s: lines){
+                System.out.println(s);
+            }
+            MyRulesBaseListener listener = new MyRulesBaseListener();
+            for (String line : lines) {
+                CharStream charStream = CharStreams.fromString(line);
+                rulesLexer lexer = new rulesLexer(charStream);
+                CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
+                rulesParser parser = new rulesParser(commonTokenStream);
+                lexer.removeErrorListeners();
+                parser.removeErrorListeners();
+                rulesParser.ProgramContext programContext = parser.program();
+                ParseTreeWalker walker = new ParseTreeWalker();
+                walker.walk(listener, programContext);
+            }
+            Map<String, Integer> CoStarList = new HashMap<String,Integer>();
+            List<String> CoActorList = new ArrayList<>();
+            String CoActor = "";
+            List<List<String>> resultTable = MyRulesBaseListener.myDbms.getTable("CoStars");
+            for(int m = 0; m < resultTable.size(); m++){
+                CoActor = resultTable.get(m).get(0);
+                if(CoStarList.containsKey(CoActor)){
+                    CoStarList.put(CoActor, CoStarList.get(CoActor) + 1);
+                }
+                else{
+                    CoStarList.put(CoActor, 1);
+                }
+            }
+            String answer = "";
+            for(Map.Entry<String,Integer> entry: CoStarList.entrySet()){
+                String CoStar = entry.getKey();
+                Integer numApp = entry.getValue();
+                if(Integer.parseInt(input2) == numApp){
+                    CoActorList.add(CoStar);
+                }
+            }
+            if(CoActorList.size() == 0){
+                System.out.println("Actor does not exist");
+            }
+            else{
+                for (String s: CoActorList){
+                    label_one.setText(label_one.getText() + s + "\n");
+                }
+            }
         }
     }
     @FXML
@@ -100,14 +158,14 @@ public class Controller implements Initializable {
             List<String> lines = new ArrayList<>();
             lines.add("CREATE TABLE ActorTable (cast_id INTEGER, actor VARCHAR(30)) PRIMARY KEY (cast_id, actor)");
             lines.add("CREATE TABLE MovieTable (movie_id INTEGER, genre VARCHAR(30)) PRIMARY KEY (movie_id, genre)");
-            String input1 = text2_1.getText();
+            String input1 = text2_1.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "").replaceAll(",","_");
             MovieDatabaseParser parser2 = new MovieDatabaseParser();
             List<Movie> moviesList = parser2.deserializeMovies("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\movies.json");
             List<Credits> creditsList = parser2.deserializeCredits("C:\\Users\\sidds\\Desktop\\movie_data\\dataJSON\\credits.json");
             List<String> allActors = new ArrayList<>();
             List<Integer> allcIds = new ArrayList<>();
             List<Integer> allmIds = new ArrayList<>();
-            for(int i = 0; i < 20;i++){
+            for(int i = 0; i < creditsList.size();i++){
                 allcIds.add(Integer.parseInt(creditsList.get(i).getId()));
                 for(int j = 0; j < creditsList.get(i).getCastMember().size(); j++){
                     String actorName = creditsList.get(i).getCastMember().get(j).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "");
@@ -116,11 +174,12 @@ public class Controller implements Initializable {
                     }
                 }
             }
-            for(int m = 0; m < 20; m++){
+            for(int m = 0; m < moviesList.size(); m++){
                 for(int n = 0; n < moviesList.get(m).getGenres().size();n++) {
                     //System.out.println(moviesList.get(m).getGenres().get(n).getName());
                     //System.out.println(moviesList.get(m).getId());
-                    lines.add("INSERT INTO MovieTable VALUES FROM (" +  moviesList.get(m).getId() + ", \"" + moviesList.get(m).getGenres().get(n).getName() + "\")");
+
+                    lines.add("INSERT INTO MovieTable VALUES FROM (" +  moviesList.get(m).getId() + ", \"" + moviesList.get(m).getGenres().get(n).getName().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "") + "\")");
                 }
             }
             //lines.add("SHOW ActorTable");
@@ -129,7 +188,7 @@ public class Controller implements Initializable {
             //lines.add("SHOW temp");
             lines.add("temp2 <- MovieTable * temp");
             lines.add("resultTable <- select (movie_id == cast_id) temp2");
-            lines.add("SHOW resultTable");
+            //lines.add("SHOW resultTable");
             MyRulesBaseListener listener = new MyRulesBaseListener();
             for (String line : lines) {
                 CharStream charStream = CharStreams.fromString(line);
@@ -142,6 +201,7 @@ public class Controller implements Initializable {
                 ParseTreeWalker walker = new ParseTreeWalker();
                 walker.walk((ParseTreeListener) listener, programContext);
             }
+
             Map<String, Integer> genreList = new HashMap<String,Integer>();
             String genre = "";
             int index = 0;
@@ -166,7 +226,16 @@ public class Controller implements Initializable {
                     answer = genre_name;
                 }
             }
-            System.out.println("The most common genre is " + answer + " and the frequency is " + freq);
+            String toScreen = "";
+            if(freq == 0){
+                toScreen = "Actor does not exist";
+            }
+            else{
+                toScreen = "The most common genre is " + answer + " and the frequency is " + freq;
+            }
+            label_two.setText(toScreen +  "\n");
+
+
         }
 
         }
@@ -177,8 +246,7 @@ public class Controller implements Initializable {
             System.out.println("Error text field 1 is empty");
         }
         else{
-            String input1 = text3_1.getText();
-            System.out.println(input1);
+            String input1 = text3_1.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "");
             MovieDatabaseParser parser2 = new MovieDatabaseParser();
 
             //List<Movie> moviesList = parser2.deserializeMovies("/Users/engrbundle/Downloads/movies_single.json");
@@ -244,11 +312,16 @@ public class Controller implements Initializable {
             }
 
             List<List<String>> Hullo = MyRulesBaseListener.myDbms.getTable("a");
-            System.out.println(Hullo);
-            //String output = "";
-            for (int i = 0; i < Hullo.size(); i++){
-                label_three.setText(label_three.getText() + Hullo.get(i).get(0) + "\n");
+            if(Hullo.size() == 0){
+                System.out.println("Error first or second input is invalid");
             }
+            else{
+                for (int i = 0; i < Hullo.size(); i++){
+                    label_three.setText(label_three.getText() + Hullo.get(i).get(0) + "\n");
+                }
+            }
+            //String output = "";
+
             //System.out.println(output);
 //            output = output.substring(0, output.length()-2).replaceAll("\"", "");
 //            label_three.setText(output);
