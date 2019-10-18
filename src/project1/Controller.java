@@ -83,7 +83,7 @@ public class Controller implements Initializable {
     @FXML
     void handleButton1(ActionEvent event) throws IOException {    //Constellation
         if(text1_1.getText().isEmpty() || text1_2.getText().isEmpty()) {
-            System.out.println("Error text field 1 or text field 2 is empty");
+            label_one.setText("Error text field 1 or text field 2 is empty");
         }
         else{
             List<String> lines = new ArrayList<>();
@@ -107,10 +107,6 @@ public class Controller implements Initializable {
                             }
                         }
                 }
-            }
-            lines.add("SHOW CoStars");
-            for(String s: lines){
-                System.out.println(s);
             }
             MyRulesBaseListener listener = new MyRulesBaseListener();
             for (String line : lines) {
@@ -146,7 +142,7 @@ public class Controller implements Initializable {
                 }
             }
             if(CoActorList.size() == 0){
-                System.out.println("Actor does not exist");
+                label_one.setText("Actor does not exist");
             }
             else{
                 for (String s: CoActorList){
@@ -158,7 +154,7 @@ public class Controller implements Initializable {
     @FXML
     void handleButton2(ActionEvent event) throws IOException {    //Typecasting
         if(text2_1.getText().isEmpty()){
-            System.out.println("Error text field 1 empty");
+            label_two.setText("Error text field 1 empty");
         }
         else{
             List<String> lines = new ArrayList<>();
@@ -249,7 +245,7 @@ public class Controller implements Initializable {
     @FXML
     void handleButton3(ActionEvent event) throws IOException {    //Cover Roles
         if(text3_1.getText().isEmpty()){
-            System.out.println("Error text field 1 is empty");
+            label_three.setText("Error text field 1 is empty");
         }
         else{
             String input1 = text3_1.getText().replaceAll(" ", "_").replaceAll("\\.", "").replaceAll("'", "");
@@ -319,7 +315,7 @@ public class Controller implements Initializable {
 
             List<List<String>> Hullo = MyRulesBaseListener.myDbms.getTable("a");
             if(Hullo.size() == 0){
-                System.out.println("Error first or second input is invalid");
+                label_three.setText("Error first input is invalid");
             }
             else{
                 for (int i = 0; i < Hullo.size(); i++){
